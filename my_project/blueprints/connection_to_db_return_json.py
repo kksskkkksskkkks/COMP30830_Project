@@ -42,14 +42,45 @@ def get_available():
         available.append(dict(row))
     return jsonify(available=available)
 
-@db_bp.route('/weather')
-def get_weather():
+# @db_bp.route('/weather')
+# def get_weather():
+#     engine = get_db()
+#     weather = []
+#     rows = engine.execute("SELECT * from weather_dublin;")
+#     for row in rows:
+#         weather.append(dict(row))
+#     return jsonify(weather=weather)
+
+
+@db_bp.route('/weather/current')
+def get_weather_current():
     engine = get_db()
-    weather = []
-    rows = engine.execute("SELECT * from weather_dublin;")
+    weather_current = []
+    rows = engine.execute("SELECT * from current;")
     for row in rows:
-        weather.append(dict(row))
-    return jsonify(weather=weather)
+        weather_current.append(dict(row))
+    return jsonify(weather_current=weather_current)
+
+@db_bp.route('/weather/daily')
+def get_weather_daily():
+    engine = get_db()
+    weather_daily = []
+    rows = engine.execute("SELECT * from daily;")
+    for row in rows:
+        weather_daily.append(dict(row))
+    return jsonify(weather_daily=weather_daily)
+
+@db_bp.route('/weather/hourly')
+def get_weather_hourly():
+    engine = get_db()
+    weather_hourly = []
+    rows = engine.execute("SELECT * from hourly;")
+    for row in rows:
+        weather_hourly.append(dict(row))
+    return jsonify(weather_hourly=weather_hourly)
+
+
+
 
 @db_bp.route("/available/<int:station_id>")
 def get_specific_station(station_id):
