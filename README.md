@@ -1,6 +1,5 @@
 # COMP30830_Project
 
-
 ## Common parameters
 > **[TEMPORARY SOLUTION]** Set the following parameters as a [.env](https://pypi.org/project/python-dotenv/) file when running locally. 
 
@@ -16,3 +15,13 @@
 ### OpenWeather
 - `OWKEY`: This is your OpenWeather API key
 - `CURRENT_URI `: [OpenWeather current weather data](https://openweathermap.org/current?collection=current_forecast)
+
+
+
+Data source:
+
+JCDecaux Open Data API  https://developer.jcdecaux.com/
+
+Static station information  and  real-time availability information
+
+Retrieve from 20260214 to 20260216
