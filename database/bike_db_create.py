@@ -1,4 +1,3 @@
-import dbinfo
 import requests
 import json
 import sqlalchemy as sqla
@@ -11,6 +10,7 @@ import simplejson as json
 import time
 from IPython.display import display
 
+from web_scraper.bike import dbinfo
 
 USER = dbinfo.USER
 PASSWORD = dbinfo.PASSWORD
