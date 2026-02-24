@@ -1,3 +1,7 @@
 *.iml
 .idea/
 dbinfo.py
+.vscode/
+
+.dbinfo_jcd.py
+.dbifo_weather.py

@@ -3,7 +3,7 @@ import json
 from sqlalchemy import create_engine
 from web_scraper.bike import dbinfo
 
-# 1. Blueprint
+
 db_bp = Blueprint('db', __name__)
 
 USER = dbinfo.USER
@@ -23,7 +23,7 @@ def get_db():
         db_engine = g._database = connect_to_db()
     return db_engine
 
-# 2.  @app.route  @db_bp.route
+#   @app.route  @db_bp.route
 @db_bp.route('/stations')
 def get_stations():
     engine = get_db()
@@ -93,6 +93,5 @@ def get_specific_station(station_id):
 
 @db_bp.route('/')
 def root():
-    return 'Navigate to /db/stations or /db/available'
+    return 'Here is the index page!'
 
-# 3.  if __name__ == '__main__': app.run(debug=True)
