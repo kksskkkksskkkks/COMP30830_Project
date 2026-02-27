@@ -2,17 +2,11 @@ import requests
 import traceback
 import datetime
 import time
-import dbinfo
+from my_project import dbinfo
 import json
-import sqlalchemy as sqla
 from sqlalchemy import create_engine
-import glob
 import os
-from pprint import pprint
 import simplejson as json
-from IPython.display import display
-
-
 
 
 # Will be used to store text in a file

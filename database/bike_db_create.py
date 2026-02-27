@@ -1,16 +1,6 @@
-import requests
-import json
-import sqlalchemy as sqla
 from sqlalchemy import create_engine
-import traceback
-import glob
-import os
-from pprint import pprint
-import simplejson as json
-import time
-from IPython.display import display
 
-from web_scraper.bike import dbinfo
+from my_project import dbinfo
 
 USER = dbinfo.USER
 PASSWORD = dbinfo.PASSWORD
