@@ -1,11 +1,35 @@
 from flask import Blueprint, render_template, jsonify
 import requests
-from web_scraper.bike import dbinfo
+from my_project import dbinfo
 from flask_caching import Cache
 
+from flask import Blueprint, g, jsonify
+from sqlalchemy import create_engine
+from my_project import dbinfo
 
-live_bp = Blueprint('live', __name__)
 
+#connect to db return json
+
+USER = dbinfo.USER
+PASSWORD = dbinfo.PASSWORD
+PORT = dbinfo.PORT
+DB = dbinfo.DB
+URI = dbinfo.URI
+
+def connect_to_db():
+    connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
+    engine = create_engine(connection_string, echo = True)
+    return engine
+
+def get_db():
+    db_engine = getattr(g, '_database', None)
+    if db_engine is None:
+        db_engine = g._database = connect_to_db()
+    return db_engine
+
+
+
+#get current data return json
 
 cache = Cache()
 
@@ -25,17 +49,6 @@ def get_weather():
     response = requests.get(url)
     return response.json() if response.status_code == 200 else {}
 
-#   @app.route    @live_bp.route
-@live_bp.route("/")
-def home():
-    return render_template("index.html")
 
-@live_bp.route("/api/bikes")
-@cache.cached(timeout=60*5)
-def bikes():
-    return jsonify(get_bike_data())
 
-@live_bp.route("/api/weather")
-@cache.cached(timeout=60*10)
-def weather():
-    return jsonify(get_weather())
+from.import routes

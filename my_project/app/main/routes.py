@@ -1,29 +1,15 @@
-from flask import Blueprint, g, render_template, jsonify
-import json
-from sqlalchemy import create_engine
-from web_scraper.bike import dbinfo
+from flask import Blueprint, jsonify, render_template
 
+from my_project.app.main import get_db, get_bike_data, get_weather, cache
 
 db_bp = Blueprint('db', __name__)
 
-USER = dbinfo.USER
-PASSWORD = dbinfo.PASSWORD
-PORT = dbinfo.PORT
-DB = dbinfo.DB
-URI = dbinfo.URI
 
-def connect_to_db():
-    connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
-    engine = create_engine(connection_string, echo = True)
-    return engine
-
-def get_db():
-    db_engine = getattr(g, '_database', None)
-    if db_engine is None:
-        db_engine = g._database = connect_to_db()
-    return db_engine
+#connect to db return json
 
 #   @app.route  @db_bp.route
+
+#   /db
 @db_bp.route('/stations')
 def get_stations():
     engine = get_db()
@@ -91,7 +77,30 @@ def get_specific_station(station_id):
         data.append(dict(row))
     return jsonify(available=data)
 
-@db_bp.route('/')
-def root():
-    return 'Here is the index page!'
+# @db_bp.route('/')
+# def root():
+#     return 'Here is the index page!'
+
+
+
+
+
+
+# get current data return json
+live_bp = Blueprint('live', __name__)
+
+#   @app.route    @live_bp.route
+@live_bp.route("/")
+def home():
+    return render_template("index.html")
+
+@live_bp.route("/api/bikes")
+@cache.cached(timeout=60*5)
+def bikes():
+    return jsonify(get_bike_data())
+
+@live_bp.route("/api/weather")
+@cache.cached(timeout=60*10)
+def weather():
+    return jsonify(get_weather())
 

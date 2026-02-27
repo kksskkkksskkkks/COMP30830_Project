@@ -2,7 +2,7 @@ import requests
 import traceback
 import datetime
 import time
-import dbinfo
+from my_project import dbinfo
 import json
 from sqlalchemy import create_engine
 import os
