@@ -1,12 +1,14 @@
+import os
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
 
-from my_project import dbinfo
+load_dotenv()
 
-USER = dbinfo.USER
-PASSWORD = dbinfo.PASSWORD
-PORT = dbinfo.PORT
-DB = dbinfo.DB
-URI = dbinfo.URI
+USER = os.getenv("DB_USER")
+PASSWORD = os.getenv("DB_PASSWORD")
+PORT = os.getenv("DB_PORT")
+DB = os.getenv("DB_NAME")
+URI = os.getenv("DB_URI")
 
 connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
 

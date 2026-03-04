@@ -1,7 +1,13 @@
 *.iml
 .idea/
 dbinfo.py
+.env
+.test.py
 
 .vscode/
 .dbinfo_jcd.py
 .dbifo_weather.py
+.DS_Store
+
+__pycache__/
+*.pyc

@@ -36,7 +36,6 @@
 * Account:
     - Signup
     - Login
-    - Forget password
     - Change password
     - My subscription/payment
 
@@ -58,47 +57,77 @@ To get started with **Dublin Bikes - Group 13 of COMP30830**, follow these steps
 
 2. Navigate to the project directory:
    ```bash
-   cd project-name
+   cd COMP38038_Project
    ```
 
-3. Install the dependencies:
+3. Set up enviroment in your conda:
    ```bash
-   npm install  # or pip install -r requirements.txt, etc.
+   conda active 'your-conda-env'
+   conda env update --file environment.yml --prune
    ```
+
+4. Create a `.env` file in the root folder
+   See [Configuration](#configuration) for the full variable list.
 
  
 ### **Configuration:** 
 To configure the project, create a `.env` file in the root directory and add the following environment variables:
 
 ```env
-# Database (TBD)
+# Database
+USER = "your_db_username"
+PASSWORD = "your_db_password"
+PORT = "your_db_port"
+DB = "your_db_name"
+URI = "your_db_uri"
 
 # Bike
-JCKEY=your_jcdecaux_key
-CONTRACT=dublin
-STATIONS_URI=https://api.jcdecaux.com/vls/v1/stations
+JCKEY = "your_jcdecaux_key"
 
 # Weather
-OWKEY=your_openwether_api_key
-CURRENT_URI=https://api.openweathermap.org/data/2.5/weather
+WEATHER_KEY = "your_openwether_api_key"
+
+# Google Map
+MAP_KEY = "your_map_key"
 ```
 
 ---
 
-## 3. (TBC) Usage
+## 3. Usage
 Here’s how to use **Dublin Bikes - Group 13 of COMP30830**:
 
-1. Run the project:
+* In terminal, at the project root folder, run:
    ```bash
-   npm start  # or python main.py, etc.
+   python run.py
    ```
-
-2. Access the application at `http://localhost:3000`.
-
 
 ---
 
 ## 4. Development Guidelines
+
+**Repo Structure**
+
+COMP30830_Project/
+├── app/                    # All application code lives here
+│   ├── __init__.py         # Factory function to create the app
+│   ├── connection.py       # Database connection (SQLAlchemy)
+│   ├── routes/             # Backend logic & API endpoints (Blueprints)
+│   │   ├── __init__.py     # Keep empty
+│   │   ├── main.py         # Business logic (Bike, weather, map)
+│   │   └── auth.py         # User related functions
+│   ├── static/             # Frontend assets (CSS, JS, Images)
+│   │   ├── styles.css
+│   │   └── scripts.js
+│   └── templates/          # Frontend HTML (Jinja2)
+│       ├── index.html
+│       ├── signup.html
+│       ├── login.html
+│       └── account.html
+├── .env                    # Environment variables (Secret keys, DB URLs)
+├── config.py               # App configuration settings
+├── requirements.txt        # Python dependencies
+└── run.py                  # Entry point to start the app
+
 
 **Coding Standards:**
 A summary of the coding best practices:
