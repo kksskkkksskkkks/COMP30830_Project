@@ -5,12 +5,14 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     """Base configuration."""
-    SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
+    JCKEY = os.getenv("JCKEY")
+    OWKEY = os.getenv("OWKEY")
+    CURRENT_URI = os.getenv("CURRENT_URI")
+    GMKEY = os.getenv("GMKEY")
 
     # General
     DEBUG = False
     TESTING = False
-
 
 
 
