@@ -57,7 +57,7 @@ To get started with **Dublin Bikes - Group 13 of COMP30830**, follow these steps
 
 2. Navigate to the project directory:
    ```bash
-   cd COMP38038_Project
+   cd COMP30838_Project
    ```
 
 3. Set up enviroment in your conda:
@@ -75,11 +75,11 @@ To configure the project, create a `.env` file in the root directory and add the
 
 ```env
 # Database
-USER = "your_db_username"
-PASSWORD = "your_db_password"
-PORT = "your_db_port"
-DB = "your_db_name"
-URI = "your_db_uri"
+DB_USER = "your_db_username"
+DB_PASSWORD = "your_db_password"
+DB_PORT = "your_db_port"
+DB_NAME = "your_db_name"
+DB_URI = "your_db_uri"
 
 # Bike
 JCKEY = "your_jcdecaux_key"

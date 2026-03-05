@@ -5,10 +5,15 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     """Base configuration."""
-    JCKEY = os.getenv("JCKEY")
-    OWKEY = os.getenv("OWKEY")
-    CURRENT_URI = os.getenv("CURRENT_URI")
-    GMKEY = os.getenv("GMKEY")
+    BIKE_KEY = os.getenv("BIKE_KEY")
+    WEATHER_KEY = os.getenv("WEATHER_KEY")
+    MAP_KEY = os.getenv("MAP_KEY")
+
+    DB_USER = os.getenv("DB_USER")
+    DB_PASSWORD = os.getenv("DB_PASSWORD")
+    DB_PORT = os.getenv("DB_PORT")
+    DB_NAME = os.getenv("DB_NAME")
+    DB_URI = os.getenv("DB_URI")
 
     # General
     DEBUG = False
