@@ -1,10 +1,8 @@
 """
 This file includes business logic related functions (e.g. bike, weather, google map)
 """
-
+from config import Config
 from flask import Blueprint, g, jsonify, render_template
-
-import os
 import requests
 from datetime import datetime, timezone
 from flask_caching import Cache
@@ -20,10 +18,6 @@ main_bp = Blueprint(
 cache = Cache()
 
 
-JCDECAUX_API_KEY = os.getenv("JCKEY")
-OPENWEATHER_API_KEY = os.getenv("OWKEY")
-
-
 @main_bp.route("/")
 def home():
     return render_template("index.html")
@@ -33,7 +27,7 @@ def home():
 # ✅ 1.1. Scrape/fetch bike info from API
 # ====== TODO: Request periodically without user's action? ======
 def get_bike_data():
-    response = requests.get("https://api.jcdecaux.com/vls/v1/stations", params={"apiKey": JCDECAUX_API_KEY, "contract": "dublin"})
+    response = requests.get("https://api.jcdecaux.com/vls/v1/stations", params={"apiKey": Config.BIKE_KEY, "contract": "dublin"})
     return response.json() if response.status_code == 200 else []
 
 
@@ -96,7 +90,7 @@ def get_specific_station(station_id):
 # ✅ 2.1 Scrape/fetch from API
 # ====== TODO: Request periodically without user's action? ======
 def get_weather():
-    response = requests.get("https://api.openweathermap.org/data/2.5/weather", params={"appid": OPENWEATHER_API_KEY, "q": "dublin, ie"})
+    response = requests.get("https://api.openweathermap.org/data/2.5/weather", params={"appid": Config.WEATHER_KEY, "q": "dublin, ie"})
     return response.json() if response.status_code == 200 else {}
 
 

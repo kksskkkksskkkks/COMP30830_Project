@@ -1,13 +1,15 @@
+# Environment variables
+.env
+
+# IDE files
 *.iml
 .idea/
 dbinfo.py
-.env
-.test.py
-
 .vscode/
 .dbinfo_jcd.py
 .dbifo_weather.py
 .DS_Store
 
+# Python
 __pycache__/
 *.pyc
