@@ -55,3 +55,6 @@ last_update bigint not null
 """
 
 engine.execute(sql)
+
+
+# ALTER TABLE station ADD PRIMARY KEY (`number`);

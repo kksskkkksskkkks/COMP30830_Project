@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Logging Out - STATION HUB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../static/css/auth.css">
+</head>
+
+<body class="bg-slate-50 flex items-center justify-center min-h-screen font-sans">
+
+    <div class="w-full max-w-md bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 text-center fade-in">
+
+        <div id="logout-processing">
+            <div
+                class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-6">
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 mb-2">Signing Out...</h2>
+            <p class="text-slate-400 font-medium">Clearing your session safely.</p>
+        </div>
+
+        <div id="logout-success" class="hidden">
+            <div
+                class="w-20 h-20 bg-emerald-100 text-green-600 rounded-full flex items-center justify-center mb-6 mx-auto success-anim">
+                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-black text-slate-800 mb-2">Logged Out</h2>
+            <p class="text-slate-500 font-medium">Redirecting you to the home page...</p>
+        </div>
+
+    </div>
+
+    <script src="../static/js/auth.js"></script>
+</body>
+
+</html>

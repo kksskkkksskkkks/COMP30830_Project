@@ -20,12 +20,13 @@ for res in engine.execute("SHOW VARIABLES;"):
 # CREATE A USERS TABLE
 sql = '''
 CREATE TABLE IF NOT EXISTS users (
-    user_id CHAR(36) NOT NULL,
+    user_id VARCHAR(25) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     preferred_language VARCHAR(10) DEFAULT 'en',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id)
+    PRIMARY KEY (user_id),
+
 );
 '''
 
@@ -43,7 +44,7 @@ print(columns)
 sql = """
 CREATE TABLE IF NOT EXISTS user_favorites (
     favorite_id INT AUTO_INCREMENT NOT NULL,
-    user_id CHAR(36) NOT NULL,
+    user_id VARCHAR(25) NOT NULL,
     station_number INT NOT NULL, 
     added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (favorite_id),

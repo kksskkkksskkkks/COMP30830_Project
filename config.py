@@ -19,6 +19,10 @@ class Config:
     DEBUG = False
     TESTING = False
 
+    # Cookie
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SECURE = False
 
 
 class DevelopmentConfig(Config):
@@ -31,5 +35,6 @@ class TestingConfig(Config):
 
 class ProductionConfig(Config):
     # Never hardcode secrets in production
+
     SECRET_KEY = os.environ.get("SECRET_KEY")
     DEBUG = False
