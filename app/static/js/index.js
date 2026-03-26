@@ -37,8 +37,8 @@ function addMarkers(stations) {
         // Create a marker for each station
         const marker = new google.maps.Marker({
             position: {
-                lat: station.position_lat,
-                lng: station.position_lng,
+                lat: station.lat, // according to station sql 
+                lng: station.lng, // according to station sql
             },
             map: map,
             title: station.name,

@@ -1,10 +1,59 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <title>Simple Map</title>
+    <style>
+        /* #map {
+            height: 100%;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        } */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Prevents scrollbars */
+        }
 
-{% block title %}
-    Index
-{% endblock %}
+        #map {
+            height: 100%;
+        }
 
-{% block main %}
-    <h1>Dublin Bikes</h1>
+        /* The Weather Box Styling */
+        #weather {
+            position: absolute;
+            top: 20px;         /* Distance from top */
+            right: 20px;       /* Distance from right */
+            z-index: 10;       /* High number so it stays above map layers */
+            
+            /* Look and Feel */
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            
+            /* Typography */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-width: 150px;
+            text-align: center;
+            color: #333;
+            pointer-events: auto; /* Ensures you can still click it if needed */
+        }
 
-{% endblock %}
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="weather"></div>
+
+
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ MY_API_KEY }}&callback=initMap" async defer></script>
+</body>
+</html>
