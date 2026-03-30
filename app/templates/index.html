@@ -1,59 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
-    <title>Simple Map</title>
-    <style>
-        /* #map {
-            height: 100%;
-        }
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        } */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Prevents scrollbars */
-        }
-
-        #map {
-            height: 100%;
-        }
-
-        /* The Weather Box Styling */
-        #weather {
-            position: absolute;
-            top: 20px;         /* Distance from top */
-            right: 20px;       /* Distance from right */
-            z-index: 10;       /* High number so it stays above map layers */
-            
-            /* Look and Feel */
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            
-            /* Typography */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-width: 150px;
-            text-align: center;
-            color: #333;
-            pointer-events: auto; /* Ensures you can still click it if needed */
-        }
-
-    </style>
+    <meta name="viewport" content="initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}">
+    <title>Dublin Bikes</title>
 </head>
 <body>
-    <div id="map"></div>
-    <div id="weather"></div>
 
+    <a href="#map" class="skip-link">Skip to map</a>
 
-    <script src="{{ url_for('static', filename='index.js') }}"></script>
+    <!-- Fixed top bar: brand | search | user controls -->
+    <div id="top-bar" role="banner">
+        <a class="top-bar-brand" href="/">Dublin Bikes</a>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ MY_API_KEY }}&callback=initMap" async defer></script>
+        <div id="search-group" role="search">
+            <label for="search-input" class="sr-only">Search address or place</label>
+            <input id="search-input" type="text" placeholder="Search address or place…" autocomplete="off">
+            <button id="btn-locate" class="btn-icon" aria-label="Use my location" title="Use my location">
+                &#9678;
+            </button>
+            <button id="btn-clear" class="btn-icon btn-icon-muted" aria-label="Clear search" title="Clear search" style="display:none;">
+                &#x2715;
+            </button>
+        </div>
+
+        <div id="top-bar-right">
+            <div class="lang-wrapper">
+                <label for="lang-switcher" class="sr-only">Language</label>
+                <select class="lang-select" id="lang-switcher">
+                    <option value="en">🌐 EN</option>
+                    <option value="fr">FR</option>
+                    <option value="it">IT</option>
+                    <option value="zh">繁中</option>
+                    <option value="cn">简中</option>
+                    <option value="jp">JP</option>
+                </select>
+            </div>
+            {% if session.get('user_id') %}
+                <a href="/auth/logout" class="top-bar-link">Log Out</a>
+            {% else %}
+                <a href="/auth/login" class="top-bar-link">Log In</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Floating panel toggle tab -->
+    <button id="btn-panel-toggle" aria-label="Open station list" aria-expanded="false" aria-controls="results-panel">
+        <span aria-hidden="true" id="toggle-icon">&#8250;</span>
+    </button>
+
+    <!-- Main layout: results panel + map -->
+    <div id="app-layout">
+
+        <div id="results-panel" class="hidden" role="region" aria-label="Nearby stations">
+            <div id="panel-header">
+                <span id="panel-title">Nearby Stations</span>
+                <button id="btn-panel-close" aria-label="Close station list">&#x2715;</button>
+            </div>
+            <ul id="station-list" aria-live="polite" aria-label="Station list"></ul>
+        </div>
+
+        <div id="map" role="application" aria-label="Dublin bike stations map"></div>
+
+    </div>
+
+    <!-- Weather widget -->
+    <div id="weather" aria-live="polite" aria-label="Current weather"></div>
+
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nearby.js') }}"></script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key={{ MAP_KEY }}&libraries=places&callback=initMap"
+        async defer>
+    </script>
+
 </body>
 </html>
