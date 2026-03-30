@@ -20,7 +20,7 @@ cache = Cache()
 
 @main_bp.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", MAP_KEY=Config.MAP_KEY)
 
 
 # 1. Bike

@@ -9,6 +9,7 @@ function initMap() {
     });
 
     getStations();
+    getWeather();
 }
 
 var map = null;
@@ -23,7 +24,7 @@ function getStations() {
     .then((data) => {
 
         console.log("fetch response", typeof data);
-        addMarkers(data);
+        addMarkers(data.stations);
     })
     .catch((error) => {
         console.log("Error fetching stations data: ", error);
@@ -37,7 +38,7 @@ function addMarkers(stations) {
         // Create a marker for each station
         const marker = new google.maps.Marker({
             position: {
-                lat: station.lat, // according to station sql 
+                lat: station.lat, // according to station sql
                 lng: station.lng, // according to station sql
             },
             map: map,
@@ -45,6 +46,8 @@ function addMarkers(stations) {
             station_number: station.number,
             icon: 'https://icons.iconarchive.com/icons/aha-soft/transport/48/bike-icon.png',
         });
+        window.stationMarkers = window.stationMarkers || {};
+        window.stationMarkers[station.number] = marker;
 
         // Create an empty infowindow
         const infoWindow = new google.maps.InfoWindow({});
