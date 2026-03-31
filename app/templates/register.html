@@ -1,25 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layout.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <title>Sign Up - STATION HUB</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../static/css/auth.css">
-</head>
+{% block title %} — Sign Up{% endblock %}
 
-<body class="bg-slate-50 flex items-center justify-center min-h-screen font-sans">
+{% block head %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center font-sans" style="min-height: calc(100vh - 72px);">
     <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-50"></div>
 
-    <div
-        class="w-full max-w-md bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+    <div class="w-full max-w-md bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
 
-        <div class="flex bg-slate-100 p-1 rounded-2xl mb-10 relative">
-            <a href="login.html"
-                class="flex-1 text-center py-2 text-sm font-bold text-slate-400 hover:text-slate-600 transition-all">Login</a>
-            <div
-                class="flex-1 text-center py-2 text-sm font-bold bg-white text-indigo-600 rounded-xl shadow-sm cursor-default">
-                Sign Up</div>
+        <div class="flex bg-slate-100 p-1 rounded-2xl mb-10">
+            <a href="/auth/login"
+                class="flex-1 text-center py-2 text-sm font-bold text-slate-400 hover:text-slate-600 transition-all">
+                Login
+            </a>
+            <div class="flex-1 text-center py-2 text-sm font-bold bg-white text-indigo-600 rounded-xl shadow-sm cursor-default">
+                Sign Up
+            </div>
         </div>
 
         <div id="success-overlay"
@@ -60,8 +61,8 @@
                 <select name="preferred_language"
                     class="w-full bg-slate-50 border-2 border-transparent p-4 rounded-2xl focus:bg-white focus:border-indigo-500 outline-none transition-all cursor-pointer">
                     <option value="en" selected>English</option>
-                    <option value="it" >Italiano</option>
                     <option value="fr">Français</option>
+                    <option value="it">Italiano</option>
                     <option value="zh">繁體中文</option>
                     <option value="cn">简体中文</option>
                     <option value="jp">Japanese</option>
@@ -74,9 +75,11 @@
                     class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin ml-3"></div>
             </button>
         </form>
+
     </div>
+</div>
+{% endblock %}
 
-    <script src="../static/js/auth.js"></script>
-</body>
-
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}
