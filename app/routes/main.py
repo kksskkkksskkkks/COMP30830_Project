@@ -2,7 +2,7 @@
 This file includes business logic related functions (e.g. bike, weather, google map)
 """
 from config import Config
-from flask import Blueprint, g, jsonify, render_template
+from flask import Blueprint, g, jsonify, render_template, session, redirect, url_for
 import requests
 from datetime import datetime, timezone
 from flask_caching import Cache
@@ -21,6 +21,18 @@ cache = Cache()
 @main_bp.route("/")
 def home():
     return render_template("index.html", MAP_KEY=Config.MAP_KEY)
+
+@main_bp.route("/bike/plot")
+def bike_plot():
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    return render_template("bike_plot.html")
+
+@main_bp.route("/bike/number")
+def bike_return():
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    return render_template("bike_return_number.html")
 
 
 # 1. Bike
