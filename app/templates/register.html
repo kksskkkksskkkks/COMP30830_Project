@@ -34,7 +34,12 @@
             <p class="text-slate-500 mt-2 font-medium">Redirecting you to login...</p>
         </div>
 
-        <form id="register-form" class="space-y-5">
+        <form id="register-form" class="space-y-5" method="POST" action="/auth/register">
+            {% if error %}
+            <div class="bg-red-100 text-red-600 p-3 rounded-xl text-sm font-bold text-center">
+                {{ error }}
+            </div>
+            {% endif %}
             <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">User ID *</label>
                 <input type="text" name="user_id" placeholder="Account ID"
@@ -81,5 +86,4 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}

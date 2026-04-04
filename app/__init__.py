@@ -10,6 +10,8 @@ from flask_cors import CORS
 # from my_project.app.main.connection_to_db_return_json import db_bp
 from config import Config
 from datetime import timedelta
+from .routes.machine_learning import ml_bp
+
 
 def create_app(config_class=Config):
     ## app = Flask(__name__, static_url_path='')
@@ -36,5 +38,7 @@ def create_app(config_class=Config):
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     # http://127.0.0.1:5000/auth/login
+
+    app.register_blueprint(ml_bp, url_prefix='/predict')
 
     return app

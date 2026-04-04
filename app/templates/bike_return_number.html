@@ -1,0 +1,212 @@
+{% extends "layout.html" %}
+
+{% block title %} — Bike Sharing Prediction System{% endblock %}
+
+{% block head %}
+    <style>
+        .center-wrapper {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 72px);
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .prediction-box {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .prediction-box h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .form-group input[type="date"],
+        .form-group input[type="time"],
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: inherit;
+            margin-bottom: 5px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .button-group button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        .btn-bike {
+            background-color: #3498db;
+        }
+        .btn-bike:hover {
+            background-color: #2980b9;
+        }
+        .btn-stand {
+            background-color: #2ecc71;
+        }
+        .btn-stand:hover {
+            background-color: #27ae60;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #ecf0f1;
+            display: none;
+            word-wrap: break-word;
+        }
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .result-content {
+            font-size: 18px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .error {
+            color: #c0392b;
+            font-size: 14px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="center-wrapper">
+
+<div class="prediction-box">
+    <h2>🚲 Station Prediction System</h2>
+
+    <div class="form-group">
+        <label for="date">Prediction Date:</label>
+        <input type="date" id="date" lang="en" required>
+    </div>
+
+    <div class="form-group">
+        <label for="time">Prediction Time:</label>
+        <input type="time" id="time" lang="en"  required>
+    </div>
+
+    <div class="form-group">
+        <label for="station_id">Station ID:</label>
+        <input type="number" id="station_id" placeholder="e.g., 42" min="1" max="117" required>
+    </div>
+
+    <div class="button-group">
+        <button class="btn-bike" onclick="makePrediction('bike')">Predict Available Bikes</button>
+        <button class="btn-stand" onclick="makePrediction('stand')">Predict Empty Stands</button>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <div class="result-title" id="resultTitle">Prediction Result:</div>
+        <div class="result-content" id="resultContent"></div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set default date to today
+    document.getElementById('date').valueAsDate = new Date();
+
+    const now = new Date();
+    const currentTime = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('time').value = currentTime;
+
+    // Core prediction function
+    async function makePrediction(type) {
+
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+        const station_id = parseInt(document.getElementById('station_id').value);
+
+        const resultBox = document.getElementById('resultBox');
+        const resultContent = document.getElementById('resultContent');
+        const resultTitle = document.getElementById('resultTitle');
+
+        // Input validation
+        if (!date || !time || isNaN(station_id) || station_id < 1 || station_id > 117) {
+            resultBox.style.display = 'block';
+            resultTitle.innerText = "Input Error";
+            resultContent.innerHTML = `<span class="error">Please complete the date and time, and ensure Station ID is between 1 and 117!</span>`;
+            return;
+        }
+
+        // Show loading state
+        resultBox.style.display = 'block';
+        resultTitle.innerText = type === 'bike' ? "Predicting available bikes..." : "Predicting empty stands...";
+        resultContent.innerHTML = `<span style="color: #7f8c8d; font-size: 14px;">Sending request...</span>`;
+
+        const baseUrl = '';
+        const endpoint = type === 'bike' ? '/predict/bike' : '/predict/stand';
+
+        const params = new URLSearchParams({
+            date: date,
+            time: time,
+            station_id: station_id
+        });
+
+        const url = `${baseUrl}${endpoint}?${params.toString()}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                resultTitle.innerText = "Prediction Successful";
+                if (type === 'bike') {
+                    resultContent.innerHTML = `Estimated Available Bikes: <span>${data.predicted_available_bikes}</span>`;
+                } else {
+                    resultContent.innerHTML = `Estimated Empty Stands: <span>${data.predicted_empty_stands}</span>`;
+                }
+            } else {
+                // Backend returned 400, 404, or 500 error
+                resultTitle.innerText = "Prediction Failed";
+                resultContent.innerHTML = `<span class="error">${data.error || 'Unknown Error'} <br> ${data.details || ''}</span>`;
+            }
+        } catch (error) {
+            // Network error or backend not running
+            resultTitle.innerText = "Connection Failed";
+            resultContent.innerHTML = `<span class="error">Could not connect to the server. Please ensure the Flask backend is running on port 5001.<br>Details: ${error.message}</span>`;
+        }
+    }
+</script>
+{% endblock %}
