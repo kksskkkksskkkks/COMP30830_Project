@@ -205,7 +205,7 @@
         } catch (error) {
             // Network error or backend not running
             resultTitle.innerText = "Connection Failed";
-            resultContent.innerHTML = `<span class="error">Could not connect to the server. Please ensure the Flask backend is running on port 5001.<br>Details: ${error.message}</span>`;
+            resultContent.innerHTML = `<span class="error">Could not connect to the server.<br>Details: ${error.message}</span>`;
         }
     }
 </script>
