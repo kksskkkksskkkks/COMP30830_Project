@@ -13,3 +13,7 @@ dbinfo.py
 # Python
 __pycache__/
 *.pyc
+
+# machine_learning
+!machine_learning/process_file/.gitkeep
+machine_learning/input_data/final_merged_data.csv

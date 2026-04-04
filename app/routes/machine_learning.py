@@ -23,13 +23,13 @@ bike_model_pipeline = None
 stand_model_pipeline = None
 
 try:
-    bike_model_pipeline = joblib.load("machine_learning/bike_availability_mlp_pipeline.joblib")
+    bike_model_pipeline = joblib.load("machine_learning/output_model/bike_availability_mlp_pipeline.joblib")
     print("[Model A] Available bike prediction model loaded successfully!")
 except Exception as e:
     print(f"[Model A] Failed to load available bike prediction model: {e}")
 
 try:
-    stand_model_pipeline = joblib.load("machine_learning/bike_stands_mlp_pipeline.joblib")
+    stand_model_pipeline = joblib.load("machine_learning/output_model/bike_stands_mlp_pipeline.joblib")
     print("[Model B] Empty stand prediction model loaded successfully!")
 except Exception as e:
     print(f"[Model B] Failed to load empty stand prediction model: {e}")

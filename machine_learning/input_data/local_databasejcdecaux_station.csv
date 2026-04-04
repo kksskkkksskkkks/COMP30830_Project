@@ -1,0 +1,6 @@
+number,contract_name,name,address,bike_stands,lat,lng,banking,bonus
+1,dublin,CLARENDON ROW,Clarendon Row,31,53.3409,-6.2625,0,0
+2,dublin,BLESSINGTON STREET,Blessington Street,20,53.3568,-6.26814,0,0
+3,dublin,BOLTON STREET,Bolton Street,20,53.3512,-6.26986,0,0
+4,dublin,GREEK STREET,Greek Street,20,53.3469,-6.27298,0,0
+5,dublin,CHARLEMONT PLACE,Charlemont Street,40,53.3307,-6.26,0,0
