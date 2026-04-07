@@ -129,23 +129,22 @@ a {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 0 2rem;
+    height: 72px;
     background-color: var(--secondary);
     border-bottom: var(--border-thick);
     box-shadow: 0px 4px 0px var(--border-dark);
-    margin-bottom: 2rem;
+    flex-shrink: 0;
 }
 
 .navbar-brand {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 800;
     color: var(--text-color);
     text-decoration: none;
     background-color: var(--accent);
-    padding: 0.2rem 1rem;
-    border: var(--border-thick);
+    padding: 0.25rem 0.9rem;
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-solid-sm);
 }
 
 /* ==========================================================================
@@ -169,10 +168,9 @@ a {
 
 .btn-primary {
     background-color: var(--primary);
-    color: white; /* Contrast against coral */
+    color: white;
 }
 
-/* The satisfying "click" animation */
 .btn:active {
     transform: translate(4px, 4px);
     box-shadow: 0px 0px 0px var(--border-dark);
@@ -285,20 +283,25 @@ a {
    6. LAYOUT — MAP PAGE (index.html) & SHARED UTILITIES
    ========================================================================== */
 
-html, body {
-    height: 100%;
-    overflow: hidden;
+body.page-map {
+    overflow-y: auto;
+}
+
+body.page-map .page-content {
+    padding: 1.5rem;
 }
 
 /* Small button variant */
 .btn-sm {
     padding: 0.4rem 0.9rem;
     font-size: 0.8rem;
+    background-color: var(--bg-color);
 }
 
-/* ── Navbar shared additions (layout.html) ── */
-.navbar {
-    margin-bottom: 0;
+.navbar-left-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .navbar-links {
@@ -315,45 +318,34 @@ html, body {
 .lang-select {
     font-family: 'Poppins', sans-serif;
     font-size: 0.82rem;
-    font-weight: 500;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background: #fff;
+    font-weight: 600;
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    background: var(--bg-color);
     padding: 0.3rem 0.5rem;
     cursor: pointer;
     outline: none;
-    color: #444;
+    color: var(--text-color);
 }
 
 .page-content {
     overflow-y: auto;
 }
 
-/* ── Top bar (index.html) ─────────────────────────────────────────────────── */
-#top-bar {
+/* ── Floating search box (centered above visible map area) ───────────────── */
+#search-float {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0 1.25rem;
-    background: #ffffff;
-    border-bottom: 1px solid #e0e0e0;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+    top: calc(72px + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 15;
+    width: min(320px, calc(100vw - 2rem));
+    transition: left 0.28s ease;
 }
 
-.top-bar-brand {
-    font-weight: 700;
-    font-size: 1rem;
-    text-decoration: none;
-    color: #111;
-    white-space: nowrap;
-    flex-shrink: 0;
-    letter-spacing: 0.02em;
+/* When panel is open, re-centre over the map portion (map starts at 300px) */
+#btn-panel-toggle.panel-open ~ #search-float {
+    left: calc(150px + 50vw);
 }
 
 #search-group {
@@ -361,17 +353,16 @@ html, body {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    background: #f5f5f5;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background: var(--bg-color);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
     padding: 0.3rem 0.75rem;
     min-width: 0;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: box-shadow 0.15s;
 }
 
 #search-group:focus-within {
-    border-color: #999;
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 0 0 3px var(--primary);
     background: #fff;
 }
 
@@ -383,11 +374,11 @@ html, body {
     outline: none;
     background: transparent;
     min-width: 0;
-    color: #222;
+    color: var(--text-color);
 }
 
 #search-input::placeholder {
-    color: #aaa;
+    color: #888;
 }
 
 /* Icon-only buttons inside the search group */
@@ -396,44 +387,21 @@ html, body {
     border: none;
     cursor: pointer;
     font-size: 1.1rem;
-    color: #555;
+    color: var(--text-color);
     padding: 0.1rem 0.3rem;
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     line-height: 1;
     transition: color 0.15s, background 0.15s;
     flex-shrink: 0;
 }
 
 .btn-icon:hover {
-    color: #111;
-    background: #e8e8e8;
+    background: var(--accent);
 }
 
 .btn-icon-muted {
-    color: #999;
+    color: #555;
     font-size: 0.9rem;
-}
-
-#top-bar-right {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-shrink: 0;
-}
-
-.top-bar-link {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: #444;
-    text-decoration: none;
-    padding: 0.3rem 0.6rem;
-    border-radius: 6px;
-    transition: background 0.15s;
-}
-
-.top-bar-link:hover {
-    background: #f0f0f0;
-    color: #111;
 }
 
 /* Google Places autocomplete z-index */
@@ -444,37 +412,37 @@ html, body {
 /* ── App layout ───────────────────────────────────────────────────────────── */
 #app-layout {
     display: flex;
-    height: calc(100vh - 56px);
-    width: 100vw;
-    margin-top: 56px;
+    width: 100%;
+    height: calc(100vh - 72px);
+    border: var(--border-thick);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-solid);
 }
 
 /* ── Panel toggle tab (floating on left edge) ─────────────────────────────── */
 #btn-panel-toggle {
     position: fixed;
-    left: 0;
+    left: 1.5rem;
     top: 50vh;
     transform: translateY(-50%);
     z-index: 10;
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
+    background: var(--accent);
+    border: var(--border-thick);
     border-left: none;
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
     padding: 1rem 0.45rem;
     cursor: pointer;
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-solid-sm);
     font-size: 1.1rem;
-    color: #555;
+    font-weight: 800;
+    color: var(--text-color);
     line-height: 1;
-    transition: left 0.28s ease, color 0.15s;
-}
-
-#btn-panel-toggle:hover {
-    color: #111;
+    transition: left 0.28s ease;
 }
 
 #btn-panel-toggle.panel-open {
-    left: 300px;
+    left: calc(1.5rem + 300px);
 }
 
 /* ── Results panel ── */
@@ -482,8 +450,8 @@ html, body {
     width: 300px;
     min-width: 300px;
     height: 100%;
-    background: #ffffff;
-    border-right: 1px solid #e0e0e0;
+    background: var(--bg-color);
+    border-right: var(--border-thick);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -502,33 +470,37 @@ html, body {
     align-items: center;
     justify-content: space-between;
     padding: 0.9rem 1rem;
-    border-bottom: 1px solid #e8e8e8;
-    background: #fafafa;
+    border-bottom: var(--border-thick);
+    background: var(--secondary);
     flex-shrink: 0;
 }
 
 #panel-title {
-    font-weight: 600;
+    font-weight: 800;
     font-size: 0.95rem;
-    color: #222;
+    color: var(--text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     white-space: nowrap;
 }
 
 #btn-panel-close {
-    background: none;
-    border: none;
+    background: var(--accent);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    font-size: 0.95rem;
-    color: #999;
-    padding: 0.2rem 0.4rem;
-    border-radius: 4px;
-    line-height: 1;
-    transition: color 0.15s, background 0.15s;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-color);
+    padding: 0.15rem 0.5rem;
+    line-height: 1.4;
+    box-shadow: var(--shadow-solid-sm);
+    transition: transform 0.1s, box-shadow 0.1s;
 }
 
-#btn-panel-close:hover {
-    color: #333;
-    background: #eee;
+#btn-panel-close:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
 }
 
 /* Scrollable station list */
@@ -542,36 +514,38 @@ html, body {
 #station-list .no-results {
     padding: 1.2rem 0.5rem;
     font-size: 0.88rem;
-    color: #888;
+    color: var(--text-color);
     text-align: center;
+    font-weight: 600;
 }
 
 /* ── Station card ─────────────────────────────────────────────────────────── */
 .station-card {
     background: #fff;
-    border: 1px solid #e8e8e8;
-    border-radius: 8px;
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
     padding: 0.7rem 0.85rem;
     margin-bottom: 0.5rem;
     cursor: pointer;
-    transition: background-color 0.12s, box-shadow 0.12s;
+    box-shadow: var(--shadow-solid-sm);
+    transition: background-color 0.12s;
 }
 
 .station-card:hover {
-    background: #f5f7ff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    transition: box-shadow 0.15s;
+    box-shadow: 0 0 0 3px var(--primary);
 }
 
 .station-card.active {
-    background: #eef1ff;
-    border-color: #c5caee;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+    transition: box-shadow 0.15s;
+    box-shadow: 0 0 0 3px var(--primary);
+    color: var(--accent);
 }
 
 .sc-name {
-    font-weight: 600;
+    font-weight: 800;
     font-size: 0.85rem;
-    color: #1a1a1a;
+    color: var(--text-color);
     margin-bottom: 0.3rem;
     line-height: 1.35;
 }
@@ -582,16 +556,16 @@ html, body {
     gap: 0.6rem;
     flex-wrap: wrap;
     font-size: 0.78rem;
-    color: #555;
+    color: var(--text-color);
+    font-weight: 600;
 }
 
 .sc-distance {
-    font-weight: 600;
-    color: #666;
+    font-weight: 800;
 }
 
 .sc-stat {
-    color: #444;
+    color: var(--text-color);
 }
 
 /* "Show more" row */
@@ -602,22 +576,23 @@ html, body {
 }
 
 .btn-show-more {
-    background: none;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    background: var(--accent);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
     padding: 0.45rem 1.2rem;
     font-family: 'Poppins', sans-serif;
     font-size: 0.82rem;
-    font-weight: 500;
-    color: #555;
+    font-weight: 600;
+    color: var(--text-color);
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    box-shadow: var(--shadow-solid-sm);
+    transition: transform 0.1s, box-shadow 0.1s;
+    text-transform: uppercase;
 }
 
-.btn-show-more:hover {
-    background: #f5f5f5;
-    border-color: #bbb;
-    color: #222;
+.btn-show-more:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
 }
 
 /* ── Map fills remaining width ── */
@@ -629,18 +604,53 @@ html, body {
 /* ── Weather widget ── */
 #weather {
     position: fixed;
-    top: 68px;
+    top: calc(72px + 12px);
     right: 16px;
     z-index: 15;
-    background: #ffffff;
+    background: var(--secondary);
     padding: 10px 14px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
     font-family: 'Poppins', sans-serif;
     font-size: 0.82rem;
+    font-weight: 600;
     min-width: 120px;
     text-align: center;
-    color: #333;
+    color: var(--text-color);
     pointer-events: auto;
+}
+
+
+/* ── Auth page animations (used by login.html / register.html) ─────────────── */
+
+.success-anim {
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); }
+    to   { transform: scale(1); }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.success-bg {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.toast-in {
+    animation: slideDown 0.4s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from { transform: translate(-50%, -100%); opacity: 0; }
+    to   { transform: translate(-50%, 0);    opacity: 1; }
 }
