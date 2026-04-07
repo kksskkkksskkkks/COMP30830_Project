@@ -2,17 +2,12 @@
 
 {% block title %} — Logging Out{% endblock %}
 
-{% block head %}
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
-{% endblock %}
-
 {% block content %}
 <div class="flex items-center justify-center font-sans" style="min-height: calc(100vh - 72px);">
     <div class="w-full max-w-md bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 text-center fade-in">
 
         <div id="logout-processing">
-            <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <div class="w-12 h-12 border-4 border-[#ff5e5e] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
             <h2 class="text-2xl font-black text-slate-900 mb-2">Signing Out...</h2>
             <p class="text-slate-400 font-medium">Clearing your session safely.</p>
         </div>
