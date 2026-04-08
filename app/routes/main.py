@@ -22,6 +22,14 @@ cache = Cache()
 def home():
     return render_template("index.html", MAP_KEY=Config.MAP_KEY)
 
+@main_bp.route("/safety")
+def safety():
+    return render_template("safety.html")
+
+@main_bp.route("/faq")
+def faq():
+    return render_template("faq.html")
+
 @main_bp.route("/bike/plot")
 def bike_plot():
     if not session.get('user_id'):
