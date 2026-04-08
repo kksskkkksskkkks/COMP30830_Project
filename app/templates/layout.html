@@ -4,25 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}">
-    <style>
-
-        html, body {
-            height: auto !important;
-            overflow: visible !important;
-            overflow-y: auto !important;
-        }
-
-        .navbar-left-group {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-    </style>
     <title>Dublin Bikes{% block title %}{% endblock %}</title>
     {% block head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
 
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -31,12 +18,14 @@
             <a class="navbar-brand" href="/">Dublin Bikes</a>
             <a href="/bike/plot" class="btn btn-sm">Prediction Plot</a>
             <a href="/bike/number" class="btn btn-sm">Prediction Number</a>
+            <a href="/safety" class="btn btn-sm">Safety</a>
+            <a href="/faq" class="btn btn-sm">FAQ</a>
         </div>
 
         <div class="navbar-links">
             <div class="lang-wrapper">
                 <select class="lang-select" id="lang-switcher">
-                    <option value="en">🌐 EN</option>
+                    <option value="en">EN</option>
                     <option value="fr">FR</option>
                     <option value="it">IT</option>
                     <option value="zh">繁中</option>

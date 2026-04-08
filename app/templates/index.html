@@ -1,57 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}">
-    <title>Dublin Bikes</title>
-</head>
-<body>
+{% extends "layout.html" %}
 
-    <a href="#map" class="skip-link">Skip to map</a>
+{% block body_class %}page-map{% endblock %}
 
-    <!-- Fixed top bar: brand | search | user controls -->
-    <div id="top-bar" role="banner">
-        <a class="top-bar-brand" href="/">Dublin Bikes</a>
+{% block title %} — Map{% endblock %}
 
-        <div id="search-group" role="search">
+{% block content %}
+
+    <button id="btn-panel-toggle" aria-label="Open station list" aria-expanded="false" aria-controls="results-panel">
+        <span aria-hidden="true" id="toggle-icon">&#8250;</span>
+    </button>
+
+    <div id="search-float">
+        <div id="search-group" role="search" aria-label="Search address or place">
             <label for="search-input" class="sr-only">Search address or place</label>
             <input id="search-input" type="text" placeholder="Search address or place…" autocomplete="off">
             <button id="btn-locate" class="btn-icon" aria-label="Use my location" title="Use my location">
-                &#9678;
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
             </button>
             <button id="btn-clear" class="btn-icon btn-icon-muted" aria-label="Clear search" title="Clear search" style="display:none;">
                 &#x2715;
             </button>
         </div>
-
-        <div id="top-bar-right">
-            <div class="lang-wrapper">
-                <label for="lang-switcher" class="sr-only">Language</label>
-                <select class="lang-select" id="lang-switcher">
-                    <option value="en">🌐 EN</option>
-                    <option value="fr">FR</option>
-                    <option value="it">IT</option>
-                    <option value="zh">繁中</option>
-                    <option value="cn">简中</option>
-                    <option value="jp">JP</option>
-                </select>
-            </div>
-            <a href="/faq" class="top-bar-link">FAQ</a>
-            <a href="/safety" class="top-bar-link">Safety</a>
-            {% if session.get('user_id') %}
-                <a href="/auth/logout" class="top-bar-link">Log Out</a>
-            {% else %}
-                <a href="/auth/login" class="top-bar-link">Log In</a>
-            {% endif %}
-        </div>
     </div>
-
-    <!-- Floating panel toggle tab -->
-    <button id="btn-panel-toggle" aria-label="Open station list" aria-expanded="false" aria-controls="results-panel">
-        <span aria-hidden="true" id="toggle-icon">&#8250;</span>
-    </button>
 
     <!-- Main layout: results panel + map -->
     <div id="app-layout">
@@ -65,18 +37,20 @@
         </div>
 
         <div id="map" role="application" aria-label="Dublin bike stations map"></div>
+        <div id="weather" aria-live="polite" aria-label="Current weather"></div>
+
 
     </div>
 
     <!-- Weather widget -->
-    <div id="weather" aria-live="polite" aria-label="Current weather"></div>
 
+{% endblock %}
+
+{% block scripts %}
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/nearby.js') }}"></script>
     <script
         src="https://maps.googleapis.com/maps/api/js?key={{ MAP_KEY }}&libraries=places&callback=initMap"
         async defer>
     </script>
-
-</body>
-</html>
+{% endblock %}
