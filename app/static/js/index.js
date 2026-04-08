@@ -2,13 +2,24 @@
 function initMap() {
     const dublin = { lat: 53.35014, lng: -6.266155 };
 
+    window.activeInfoWindow = new google.maps.InfoWindow({});
+    window.activeInfoWindow.addListener('closeclick', () => {
+        if (window.nearbyClearActive) window.nearbyClearActive();
+    });
+
+    // Load Charts library once — ready before any marker is clicked
+    google.charts.load('current', { packages: ['corechart'] });
+
     // The map, centered at Dublin
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 14,
         center: dublin,
+        mapId: 'DEMO_MAP_ID',
+        gestureHandling: 'greedy',
     });
 
-    getStations();
+    // Expose stations promise — nearby.js uses it to avoid a duplicate fetch
+    window.stationsReady = getStations();
     getWeather();
 }
 
@@ -17,79 +28,85 @@ window.initMap = initMap;
 
 
 function getStations() {
-    fetch("/db/stations")
-    .then((response) => {
-        return response.json()
-    })
-    .then((data) => {
-
-        console.log("fetch response", typeof data);
-        addMarkers(data.stations);
-    })
-    .catch((error) => {
-        console.log("Error fetching stations data: ", error);
-    })
+    return fetch("/db/stations")
+    .then((response) => response.json())
+    .then((data) => data.stations)
+    .catch((error) => console.error("Error fetching stations data:", error));
 }
 
 function addMarkers(stations) {
-    console.log(stations); 
+    window.stationMarkers = window.stationMarkers || {};
 
     for (const station of stations) {
-        // Create a marker for each station
-        const marker = new google.maps.Marker({
-            position: {
-                lat: station.lat, // according to station sql
-                lng: station.lng, // according to station sql
-            },
+        const live   = (window.nearbyLiveData || {})[station.number] || {};
+        const bikes  = live.available_bikes           !== undefined ? live.available_bikes           : '–';
+        const stands = live.available_bike_stands     !== undefined ? live.available_bike_stands     : '–';
+
+        // Mini badge shown on the map
+        const badge = document.createElement('div');
+        badge.className = 'station-badge';
+        badge.innerHTML = `<span>🚲 ${bikes}</span><span class="badge-divider">|</span><span>🅿️ ${stands}</span>`;
+
+        const marker = new google.maps.marker.AdvancedMarkerElement({
+            position: { lat: station.lat, lng: station.lng },
             map: map,
             title: station.name,
-            station_number: station.number,
-            icon: 'https://icons.iconarchive.com/icons/aha-soft/transport/48/bike-icon.png',
+            content: badge,
         });
-        window.stationMarkers = window.stationMarkers || {};
+
         window.stationMarkers[station.number] = marker;
 
-        // Create an empty infowindow
-        const infoWindow = new google.maps.InfoWindow({});
-
-        // Add a click listener to the marker to show the info window
+        // Click — open info window with chart
         marker.addListener("click", () => {
-            // Define container for the chart
-            const chartContainer = document.createElement('div');
-            chartContainer.style.width = '300px';
-            chartContainer.style.height = '200px';
+            const ld     = (window.nearbyLiveData || {})[station.number] || {};
+            const bikes2  = ld.available_bikes       !== undefined ? ld.available_bikes       : 'N/A';
+            const stands2 = ld.available_bike_stands !== undefined ? ld.available_bike_stands : 'N/A';
 
-            // Info window content (including chart div placeholder with this id)
+            if (window.nearbySetActive) window.nearbySetActive(station.number);
+
             const content = `
                 <div>
-                    <h3>${station.number}</h3>
-                    <p><strong>Address:</strong> ${station.number || "N/A"}</p>
-                    <p><strong>Available Bike Stands:</strong> ${station.available_bike_stands || "N/A"}</p>
-                    <div id="chart_div_${station.number}" style="width: 300px; height: 200px;"></div>
+                    <div class="iw-header">
+                        <div class="iw-title">${station.name}</div>
+                        <button class="iw-close" onclick="window.activeInfoWindow.close()" aria-label="Close">&#x2715;</button>
+                    </div>
+                    <div class="iw-stats">🚲 <strong>${bikes2}</strong> bikes &nbsp;|&nbsp; 🅿️ <strong>${stands2}</strong> stands</div>
+                    <div id="chart_div_${station.number}" class="iw-chart"></div>
                 </div>
             `;
 
-            // Set the content
-            infoWindow.setContent(content);
+            window.activeInfoWindow.setContent(content);
+            window.activeInfoWindow.open(map, marker);
 
-            // Open the window
-            infoWindow.open(map, marker);
-
-            // ADD CHART CODE
-
-            // Fetch the station-specific data and draw the chart
-            fetch(`/db/available/${station.number}`)
-                .then((response) => response.json())
-                .then((data) => {
-                    // Load Google Charts library
-                    google.charts.load('current', { packages: ['corechart'] });
-
-                    // When the library is ready, draw the chart (calling the function drawChart)
-                    google.charts.setOnLoadCallback(() => drawChart(data, station.number));
-                })
-                .catch((error) => {
-                    console.error(`Error fetching data for station ${station.number}:`, error);
+            google.maps.event.addListenerOnce(window.activeInfoWindow, 'domready', () => {
+                // Pan map so IW clears the search bar
+                requestAnimationFrame(() => {
+                    const iw = document.querySelector('.gm-style-iw-a');
+                    const searchFloat = document.getElementById('search-float');
+                    if (iw && searchFloat) {
+                        const iwTop = iw.getBoundingClientRect().top;
+                        const searchBottom = searchFloat.getBoundingClientRect().bottom;
+                        const gap = 16;
+                        if (iwTop < searchBottom + gap) {
+                            window.map.panBy(0, -(searchBottom + gap - iwTop));
+                        }
+                    }
                 });
+
+                fetch(`/db/available/${station.number}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        google.charts.setOnLoadCallback(() => drawChart(data.available, station.number));
+                    })
+                    .catch((error) => {
+                        console.error(`Error fetching data for station ${station.number}:`, error);
+                    });
+            });
+        });
+
+        // Hover — open info window (same as click)
+        marker.addListener("mouseover", () => {
+            google.maps.event.trigger(marker, 'click');
         });
     }
 }
@@ -98,35 +115,26 @@ function addMarkers(stations) {
 function drawChart(data, stationId) {
     const chartData = new google.visualization.DataTable();
 
-    // Define columns
-    chartData.addColumn('datetime', 'Time'); // x-axis (Date/Time)
-    chartData.addColumn('number', 'Available Bikes'); // y-axis (Bikes)
+    chartData.addColumn('datetime', 'Time');
+    chartData.addColumn('number', 'Available Bikes');
 
-    // Populate chart rows with fetched data
     data.forEach((entry) => {
         chartData.addRow([
-            new Date(entry.last_update), // Convert timestamp to Date
-            entry.available_bikes,      // Bikes count
+            new Date(entry.last_update),
+            entry.available_bikes,
         ]);
     });
 
-    // Chart options
     const options = {
         title: `Available Bikes at Station ${stationId}`,
-        hAxis: {
-            title: 'Time',
-            format: 'HH:mm', // Format time as hours and minutes
-        },
-        vAxis: {
-            title: 'Available Bikes',
-        },
-        curveType: 'function', // Smooth line
+        hAxis: { title: 'Time', format: 'HH:mm' },
+        vAxis: { title: 'Available Bikes' },
+        curveType: 'function',
         legend: { position: 'bottom' },
-        width: 400,
-        height: 250,
+        width: 280,
+        height: 150,
     };
 
-    // Draw the chart in the placeholder div
     const chart = new google.visualization.LineChart(
         document.getElementById(`chart_div_${stationId}`)
     );
@@ -138,25 +146,15 @@ function drawChart(data, stationId) {
 // Get current weather
 function getWeather() {
     fetch("/db/weather/current")
-    .then((response) => {
-        return response.json()
-    })
-    .then((data) => {
-
-        console.log("fetch response", typeof data);
-
-        displayWeather(data);
-    })
-    .catch((error) => {
-        console.log("Error fetching weather data: ", error);
-    })
+    .then((response) => response.json())
+    .then((data) => displayWeather(data))
+    .catch((error) => console.error("Error fetching weather data:", error));
 }
 
 function displayWeather(data) {
     console.log("This is what I received:", data);
     console.log("This is what I received:", data.current.temp);
     const weatherDiv = document.getElementById("weather");
-    
     weatherDiv.innerHTML = `
         <div style="font-weight: bold;">Dublin Weather</div>
         <div style="font-size: 1.2em;">${Math.round(data.current.feels_like)}°C</div>

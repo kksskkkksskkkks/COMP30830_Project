@@ -16,8 +16,6 @@
     <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="navbar-left-group">
             <a class="navbar-brand" href="/">Dublin Bikes</a>
-            <a href="/bike/plot" class="btn btn-sm">Prediction Plot</a>
-            <a href="/bike/number" class="btn btn-sm">Prediction Number</a>
             <a href="/safety" class="btn btn-sm">Safety</a>
             <a href="/faq" class="btn btn-sm">FAQ</a>
         </div>
@@ -45,6 +43,100 @@
     <main id="main-content" class="page-content">
         {% block content %}{% endblock %}
     </main>
+
+    <footer style="
+        background-color: var(--text-color);
+        color: #fff;
+        border-top: var(--border-thick);
+        padding: 2.5rem 2rem 1.5rem;
+        font-family: 'Poppins', sans-serif;
+    ">
+        <div style="max-width: 1200px; margin: 0 auto;">
+
+            <!-- Top row: brand + columns -->
+            <div style="display: flex; flex-wrap: wrap; gap: 2.5rem; margin-bottom: 2rem;">
+
+                <!-- Brand -->
+                <div style="flex: 1; min-width: 200px;">
+                    <a href="/" style="
+                        display: inline-block;
+                        font-size: 1.3rem;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        background-color: var(--accent);
+                        color: var(--text-color);
+                        padding: 0.25rem 0.9rem;
+                        border-radius: var(--radius-md);
+                        margin-bottom: 0.75rem;
+                    ">Dublin Bikes</a>
+                    <p style="font-weight: 400; font-size: 0.82rem; color: #aaa; line-height: 1.6; margin: 0;">
+                        A real-time bike availability tracker and prediction tool for the Dublin Bikes scheme.
+                        Built as part of COMP30830.
+                    </p>
+                </div>
+
+                <!-- Explore -->
+                <div style="min-width: 140px;">
+                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Explore</p>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <li><a href="/" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none; transition: color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Map</a></li>
+                        <li><a href="/bike/plot" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Prediction Plot</a></li>
+                        <li><a href="/bike/number" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Prediction Number</a></li>
+                    </ul>
+                </div>
+
+                <!-- Help -->
+                <div style="min-width: 140px;">
+                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Help</p>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <li><a href="/faq" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">FAQ</a></li>
+                        <li><a href="/safety" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Safety Guide</a></li>
+                    </ul>
+                </div>
+
+                <!-- Account -->
+                <div style="min-width: 140px;">
+                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Account</p>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+                        {% if session.get('user_id') %}
+                        <li><a href="/auth/logout" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Log Out</a></li>
+                        {% else %}
+                        <li><a href="/auth/login" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Log In</a></li>
+                        <li><a href="/auth/register" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Sign Up</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Emergency -->
+                <div style="min-width: 180px;">
+                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Emergency</p>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
+                        <li style="font-size: 0.82rem; color: #aaa; font-weight: 400;">🆘 Emergency: <strong style="color: #fff;">999 / 112</strong></li>
+                        <li style="font-size: 0.82rem; color: #aaa; font-weight: 400;">📞 Dublin Bikes: <strong style="color: #fff;">1800 927 000</strong></li>
+                        <li style="font-size: 0.82rem; color: #aaa; font-weight: 400;">🚔 Garda: <strong style="color: #fff;">01 666 9500</strong></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Divider -->
+            <div style="border-top: 2px solid #333; padding-top: 1.25rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
+                <p style="font-size: 0.78rem; color: #666; margin: 0; font-weight: 400;">
+                    © 2024 Dublin Bikes App — COMP30830 Project. Data provided by
+                    <a href="https://developer.jcdecaux.com" target="_blank" rel="noopener" style="color: var(--secondary); font-weight: 600;">JCDecaux</a>
+                    &amp;
+                    <a href="https://openweathermap.org" target="_blank" rel="noopener" style="color: var(--secondary); font-weight: 600;">OpenWeather</a>.
+                </p>
+                <div style="display: flex; gap: 0.75rem;">
+                    <a href="/faq" style="font-size: 0.78rem; font-weight: 700; color: #666; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">FAQ</a>
+                    <span style="color: #444;">·</span>
+                    <a href="/safety" style="font-size: 0.78rem; font-weight: 700; color: #666; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">Safety</a>
+                </div>
+            </div>
+
+        </div>
+    </footer>
 
     {% block scripts %}{% endblock %}
 
