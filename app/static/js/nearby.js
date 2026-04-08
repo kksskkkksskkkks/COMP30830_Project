@@ -22,22 +22,46 @@
     };
 
     function initNearby() {
-        document.getElementById('btn-panel-toggle').addEventListener('click', togglePanel);
+        document.getElementById('btn-panel-toggle').addEventListener('click', () => {
+            if (window.activeInfoWindow) window.activeInfoWindow.close();
+            togglePanel();
+        });
         document.getElementById('btn-panel-close').addEventListener('click', closePanel);
         document.getElementById('btn-locate').addEventListener('click', handleLocate);
         document.getElementById('btn-clear').addEventListener('click', clearSearch);
 
+        // Close IW when search box is focused
+        document.getElementById('search-input').addEventListener('focus', () => {
+            if (window.activeInfoWindow) window.activeInfoWindow.close();
+        });
+
+        // Escape key closes IW
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && window.activeInfoWindow) window.activeInfoWindow.close();
+        });
+
         window.map.addListener('click', function (e) {
+            if (window.activeInfoWindow) window.activeInfoWindow.close();
             placeOrigin(e.latLng.lat(), e.latLng.lng(), 'Pinned Location');
+        });
+
+        window.map.addListener('dragstart', function () {
+            if (window.activeInfoWindow) window.activeInfoWindow.close();
+        });
+
+        window.map.addListener('dragend', function () {
+            const c = window.map.getCenter();
+            runNearbySearch(c.lat(), c.lng());
         });
 
         initAutocomplete();
 
-        // Fetch data then run default search centred on Dublin
+        // Use the stations promise from index.js (no duplicate fetch) + live data
         Promise.all([
-            fetch('/db/stations').then(r => r.json()).then(d => { allStations = d.stations || []; }),
-            fetch('/api/bikes').then(r => r.json()).then(d => { d.forEach(s => { liveData[s.number] = s; }); }),
+            window.stationsReady.then(stations => { allStations = stations || []; }),
+            fetch('/api/bikes').then(r => r.json()).then(d => { d.forEach(s => { liveData[s.number] = s; }); window.nearbyLiveData = liveData; }),
         ]).then(() => {
+            addMarkers(allStations);   // markers created after live data is ready — badges show accurate counts
             runNearbySearch(DUBLIN_CENTER.lat, DUBLIN_CENTER.lng);
         }).catch(err => console.error('[nearby] data fetch failed:', err));
     }
@@ -52,6 +76,7 @@
     }
 
     function closePanel() {
+        if (window.activeInfoWindow) window.activeInfoWindow.close();
         document.getElementById('results-panel').classList.add('hidden');
         const btn = document.getElementById('btn-panel-toggle');
         btn.classList.remove('panel-open');
@@ -92,6 +117,7 @@
 
     // ── Place origin pin ───────────────────────────────────────────────────────
     function placeOrigin(lat, lng, label) {
+        if (window.activeInfoWindow) window.activeInfoWindow.close();
         if (searchMarker) {
             searchMarker.setPosition({ lat, lng });
         } else {
@@ -155,8 +181,8 @@
             list.appendChild(li);
         } else {
             stations.forEach(s => {
-                const bikes  = s.live.available_bikes !== undefined ? s.live.available_bikes : '–';
-                const stands = s.live.available_bike_stands !== undefined ? s.live.available_bike_stands : '–';
+                const bikes  = s.live.available_bikes           !== undefined ? s.live.available_bikes           : '–';
+                const stands = s.live.available_bike_stands     !== undefined ? s.live.available_bike_stands     : '–';
 
                 const li = document.createElement('li');
                 li.className = 'station-card';
@@ -174,7 +200,10 @@
                     window.map.panTo({ lat: s.lat, lng: s.lng });
                     window.map.setZoom(16);
                     setActive(s.number);
+                    const marker = (window.stationMarkers || {})[s.number];
+                    if (marker) google.maps.event.trigger(marker, 'click');
                 });
+
                 li.addEventListener('mouseenter', () => setActive(s.number));
                 li.addEventListener('mouseleave', clearActive);
 
@@ -187,6 +216,7 @@
                 li.className = 'show-more-item';
                 li.innerHTML = '<button class="btn-show-more">Show more</button>';
                 li.querySelector('button').addEventListener('click', () => {
+                    if (window.activeInfoWindow) window.activeInfoWindow.close();
                     displayLimit += PAGE_SIZE;
                     const next = currentResults.slice(0, displayLimit);
                     renderPanel(next);
@@ -204,7 +234,7 @@
         const shown   = new Set(displayedStations.map(s => s.number));
         const markers = window.stationMarkers || {};
         Object.keys(markers).forEach(num => {
-            markers[num].setOpacity(shown.has(parseInt(num)) ? 1.0 : 0.15);
+            markers[num].content.style.display = shown.has(parseInt(num)) ? '' : 'none';
         });
     }
 
@@ -221,11 +251,8 @@
 
         const marker = (window.stationMarkers || {})[number];
         if (marker) {
-            marker.setIcon({
-                url: 'https://icons.iconarchive.com/icons/aha-soft/transport/48/bike-icon.png',
-                scaledSize: new google.maps.Size(48, 48),
-            });
-            marker.setZIndex(500);
+            marker.content.classList.add('station-badge--active');
+            marker.zIndex = 500;
         }
     }
 
@@ -237,20 +264,22 @@
 
         const marker = (window.stationMarkers || {})[activeNumber];
         if (marker) {
-            marker.setIcon({
-                url: 'https://icons.iconarchive.com/icons/aha-soft/transport/48/bike-icon.png',
-                scaledSize: new google.maps.Size(32, 32),
-            });
-            marker.setZIndex(null);
+            marker.content.classList.remove('station-badge--active');
+            marker.zIndex = null;
         }
         activeNumber = null;
     }
 
+    // Expose active state controls to index.js
+    window.nearbySetActive   = setActive;
+    window.nearbyClearActive = clearActive;
+
     // ── Clear search — reset to Dublin city centre ─────────────────────────────
     function clearSearch() {
+        if (window.activeInfoWindow) window.activeInfoWindow.close();
         if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
 
-        Object.values(window.stationMarkers || {}).forEach(m => m.setOpacity(1.0));
+        Object.values(window.stationMarkers || {}).forEach(m => m.content.style.display = '');
 
         document.getElementById('search-input').value = '';
         document.getElementById('btn-clear').style.display = 'none';

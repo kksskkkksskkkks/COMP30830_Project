@@ -296,6 +296,7 @@ body.page-map .page-content {
     padding: 0.4rem 0.9rem;
     font-size: 0.8rem;
     background-color: var(--bg-color);
+    border-color: transparent;
 }
 
 .navbar-left-group {
@@ -334,18 +335,18 @@ body.page-map .page-content {
 
 /* ── Floating search box (centered above visible map area) ───────────────── */
 #search-float {
-    position: fixed;
-    top: calc(72px + 12px);
+    position: absolute;
+    top: 12px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 15;
-    width: min(320px, calc(100vw - 2rem));
+    width: min(320px, calc(100% - 2rem));
     transition: left 0.28s ease;
 }
 
 /* When panel is open, re-centre over the map portion (map starts at 300px) */
 #btn-panel-toggle.panel-open ~ #search-float {
-    left: calc(150px + 50vw);
+    left: calc(150px + 50%);
 }
 
 #search-group {
@@ -411,6 +412,7 @@ body.page-map .page-content {
 
 /* ── App layout ───────────────────────────────────────────────────────────── */
 #app-layout {
+    position: relative;
     display: flex;
     width: 100%;
     height: calc(100vh - 72px);
@@ -420,11 +422,23 @@ body.page-map .page-content {
     box-shadow: var(--shadow-solid);
 }
 
-/* ── Panel toggle tab (floating on left edge) ─────────────────────────────── */
+/* ── Map overlay (contains floating UI elements positioned over the map) ── */
+#map-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#map-overlay > * {
+    pointer-events: auto;
+}
+
+/* ── Panel toggle tab (floating on left edge of map overlay) ──────────────── */
 #btn-panel-toggle {
-    position: fixed;
-    left: 1.5rem;
-    top: 50vh;
+    position: absolute;
+    left: 0;
+    top: 50%;
     transform: translateY(-50%);
     z-index: 10;
     background: var(--accent);
@@ -442,7 +456,7 @@ body.page-map .page-content {
 }
 
 #btn-panel-toggle.panel-open {
-    left: calc(1.5rem + 300px);
+    left: 300px;
 }
 
 /* ── Results panel ── */
@@ -525,7 +539,7 @@ body.page-map .page-content {
     border: var(--border-thick);
     border-radius: var(--radius-md);
     padding: 0.7rem 0.85rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
     cursor: pointer;
     box-shadow: var(--shadow-solid-sm);
     transition: background-color 0.12s;
@@ -533,6 +547,7 @@ body.page-map .page-content {
 
 .station-card:hover {
     transition: box-shadow 0.15s;
+    transform: scale(1.05);
     box-shadow: 0 0 0 3px var(--primary);
 }
 
@@ -590,9 +605,8 @@ body.page-map .page-content {
     text-transform: uppercase;
 }
 
-.btn-show-more:active {
-    transform: translate(4px, 4px);
-    box-shadow: none;
+.btn-show-more:hover {
+    transform: scale(1.05);
 }
 
 /* ── Map fills remaining width ── */
@@ -603,8 +617,8 @@ body.page-map .page-content {
 
 /* ── Weather widget ── */
 #weather {
-    position: fixed;
-    top: calc(72px + 12px);
+    position: absolute;
+    top: 12px;
     right: 16px;
     z-index: 15;
     background: var(--secondary);
@@ -621,6 +635,108 @@ body.page-map .page-content {
     pointer-events: auto;
 }
 
+/* ── Google Maps Info Window — City Pop style ─────────────────────────────── */
+.gm-style .gm-style-iw-c {
+    font-family: 'Poppins', sans-serif !important;
+    background-color: var(--bg-color) !important;
+    border: var(--border-thick) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-solid-sm) !important;
+    padding: 0 !important;
+    min-width: 280px;
+}
+
+.gm-style .gm-style-iw-d {
+    overflow: hidden !important;
+    padding: 0.75rem !important;
+}
+
+.gm-style .gm-style-iw-t::after {
+    background: var(--bg-color) !important;
+}
+
+/* Hide GM's own close button */
+.gm-style .gm-style-iw-chr {
+    display: none !important;
+}
+
+/* IW header: title + close button side by side */
+.iw-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.iw-title {
+    font-weight: 800;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-color);
+}
+
+.iw-close {
+    background: var(--accent);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-color);
+    padding: 0.1rem 0.35rem;
+    line-height: 1.4;
+    box-shadow: 2px 2px 0px var(--border-dark);
+    flex-shrink: 0;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.iw-stats {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.iw-chart {
+    width: 280px;
+    height: 150px;
+}
+
+
+/* ── Map station badge (AdvancedMarkerElement content) ───────────────────── */
+.station-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--bg-color);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    padding: 0.2rem 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-color);
+    box-shadow: var(--shadow-solid-sm);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.station-badge:hover {
+    transform: scale(1.1);
+}
+
+.station-badge--active {
+    box-shadow: 0 0 0 3px var(--primary);
+    transform: scale(1.2);
+}
+
+.badge-divider {
+    opacity: 0.4;
+    font-weight: 400;
+}
 
 /* ── Auth page animations (used by login.html / register.html) ─────────────── */
 
