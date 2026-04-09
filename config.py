@@ -7,7 +7,8 @@ class Config:
     """Base configuration."""
     BIKE_KEY = os.getenv("BIKE_KEY")
     WEATHER_KEY = os.getenv("WEATHER_KEY")
-    MAP_KEY =os.getenv("MAP_KEY")
+    MAP_KEY = os.getenv("MAP_KEY")
+    MAP_ID  = os.getenv("MAP_ID")
 
     DB_USER = os.getenv("DB_USER")
     DB_PASSWORD = os.getenv("DB_PASSWORD")

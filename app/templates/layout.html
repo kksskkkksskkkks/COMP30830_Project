@@ -32,10 +32,10 @@
                 </select>
             </div>
             {% if session.get('user_id') %}
+                <a href="/account" class="btn btn-sm">Account</a>
                 <a href="/auth/logout" class="btn btn-sm">Log Out</a>
             {% else %}
                 <a href="/auth/login"    class="btn btn-sm">Log In</a>
-                <a href="/auth/register" class="btn btn-primary btn-sm">Sign Up</a>
             {% endif %}
         </div>
     </nav>
@@ -100,6 +100,7 @@
                     <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Account</p>
                     <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
                         {% if session.get('user_id') %}
+                        <li><a href="/account" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">My Account</a></li>
                         <li><a href="/auth/logout" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Log Out</a></li>
                         {% else %}
                         <li><a href="/auth/login" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Log In</a></li>

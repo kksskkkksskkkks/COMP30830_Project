@@ -11,6 +11,9 @@
     let displayLimit   = 20;
     let activeNumber   = null;
 
+    // Favourites — shared with index.js via window
+    window.userFavorites = new Set();
+
     const DUBLIN_CENTER = { lat: 53.3498, lng: -6.2603 };
     const PAGE_SIZE     = 20;
 
@@ -56,15 +59,49 @@
 
         initAutocomplete();
 
-        // Use the stations promise from index.js (no duplicate fetch) + live data
+        // Use the stations promise from index.js (no duplicate fetch) + live data + favorites
         Promise.all([
             window.stationsReady.then(stations => { allStations = stations || []; }),
             fetch('/api/bikes').then(r => r.json()).then(d => { d.forEach(s => { liveData[s.number] = s; }); window.nearbyLiveData = liveData; }),
+            loadFavorites(),
         ]).then(() => {
             addMarkers(allStations);   // markers created after live data is ready — badges show accurate counts
             runNearbySearch(DUBLIN_CENTER.lat, DUBLIN_CENTER.lng);
         }).catch(err => console.error('[nearby] data fetch failed:', err));
     }
+
+    // ── Favourites ─────────────────────────────────────────────────────────────
+    function loadFavorites() {
+        if (!window.IS_LOGGED_IN) return Promise.resolve();
+        return fetch('/auth/favorites')
+            .then(r => r.json())
+            .then(d => { window.userFavorites = new Set((d.favorites || []).map(f => f.station_number)); })
+            .catch(() => {});
+    }
+
+    function toggleFavorite(stationNumber, btn) {
+        const isFav  = window.userFavorites.has(stationNumber);
+        const method = isFav ? 'DELETE' : 'POST';
+        const url    = isFav ? `/auth/favorites/${stationNumber}` : '/auth/favorites';
+        const opts   = { method };
+        if (!isFav) {
+            opts.headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            opts.body    = `station_number=${stationNumber}`;
+        }
+        fetch(url, opts)
+            .then(r => r.json())
+            .then(() => {
+                if (isFav) { window.userFavorites.delete(stationNumber); }
+                else        { window.userFavorites.add(stationNumber); }
+                // Sync all fav buttons for this station (card + IW)
+                document.querySelectorAll(`.btn-fav[data-fav-number="${stationNumber}"]`).forEach(b => {
+                    b.classList.toggle('fav--active', !isFav);
+                });
+            })
+            .catch(err => console.error('[fav] toggle failed:', err));
+    }
+
+    window.toggleFavorite = toggleFavorite;
 
     // ── Panel open / close / toggle ────────────────────────────────────────────
     function openPanel() {
@@ -184,17 +221,35 @@
                 const bikes  = s.live.available_bikes           !== undefined ? s.live.available_bikes           : '–';
                 const stands = s.live.available_bike_stands     !== undefined ? s.live.available_bike_stands     : '–';
 
+                const isFav  = window.IS_LOGGED_IN && window.userFavorites.has(s.number);
+                const favBtn = window.IS_LOGGED_IN
+                    ? `<button class="btn-fav${isFav ? ' fav--active' : ''}"
+                               data-fav-number="${s.number}"
+                               aria-label="Toggle favourite">&#9829;</button>`
+                    : '';
+
                 const li = document.createElement('li');
                 li.className = 'station-card';
                 li.dataset.number = s.number;
                 li.innerHTML = `
-                    <div class="sc-name">${s.name}</div>
+                    <div class="sc-name-row" style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.4rem;">
+                        <div class="sc-name">${s.name}</div>
+                        ${favBtn}
+                    </div>
                     <div class="sc-row">
                         <span class="sc-distance">${s.distance.toFixed(2)} km away</span>
                         <span class="sc-stat">🚲 ${bikes}</span>
                         <span class="sc-stat">🅿️ ${stands}</span>
                     </div>
                 `;
+
+                // Fav button click — don't propagate to card
+                if (window.IS_LOGGED_IN) {
+                    li.querySelector('.btn-fav').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleFavorite(s.number, e.currentTarget);
+                    });
+                }
 
                 li.addEventListener('click', () => {
                     window.map.panTo({ lat: s.lat, lng: s.lng });

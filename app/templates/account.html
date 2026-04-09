@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+
+{% block title %} — Account{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+
+    <!-- Page Header -->
+    <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 2.2rem; line-height: 1.2; margin-bottom: 0.4rem;">My Account</h1>
+        <p style="font-weight: 400; color: #555; font-size: 0.95rem; text-transform: none; letter-spacing: 0;">
+            Manage your profile and favourite stations.
+        </p>
+    </div>
+
+    <!-- User Info Card -->
+    <div class="card" style="margin-bottom: 2rem; max-width: 520px;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+            <div style="
+                width: 52px; height: 52px;
+                background: var(--secondary);
+                border: var(--border-thick);
+                border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                font-weight: 800; font-size: 1.3rem;
+                flex-shrink: 0;
+            ">{{ user.full_name[0].upper() }}</div>
+            <div>
+                <div style="font-weight: 800; font-size: 1.05rem;">{{ user.full_name }}</div>
+                <div style="font-size: 0.82rem; color: #666; font-weight: 400;">{{ user.user_id }}</div>
+            </div>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem;">
+            <tbody>
+                <tr style="border-top: 2px solid #eee;">
+                    <td style="padding: 0.6rem 0; font-weight: 700; width: 40%; color: #555;">User ID</td>
+                    <td style="padding: 0.6rem 0;">{{ user.user_id }}</td>
+                </tr>
+                <tr style="border-top: 2px solid #eee;">
+                    <td style="padding: 0.6rem 0; font-weight: 700; color: #555;">Full Name</td>
+                    <td style="padding: 0.6rem 0;">{{ user.full_name }}</td>
+                </tr>
+                <tr style="border-top: 2px solid #eee;">
+                    <td style="padding: 0.6rem 0; font-weight: 700; color: #555;">Language</td>
+                    <td style="padding: 0.6rem 0; text-transform: uppercase;">{{ user.preferred_language }}</td>
+                </tr>
+                <tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
+                    <td style="padding: 0.6rem 0; font-weight: 700; color: #555;">Member Since</td>
+                    <td style="padding: 0.6rem 0;">{{ user.created_at.strftime('%d %b %Y') if user.created_at else '—' }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Favourite Stations -->
+    <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <h2 style="font-size: 1.2rem; margin: 0;">Favourite Stations</h2>
+            <span class="badge" style="background: var(--primary); color: white;">{{ favorites | length }}</span>
+        </div>
+
+        {% if favorites %}
+        <ul id="fav-list" style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; max-width: 520px;">
+            {% for fav in favorites %}
+            <li id="fav-item-{{ fav.station_number }}" style="
+                background: #fff;
+                border: var(--border-thick);
+                border-radius: var(--radius-md);
+                padding: 0.75rem 1rem;
+                box-shadow: var(--shadow-solid-sm);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.75rem;
+            ">
+                <div>
+                    <div style="font-weight: 800; font-size: 0.9rem;">{{ fav.station_name }}</div>
+                    <div style="font-size: 0.78rem; color: #777; font-weight: 400; margin-top: 0.1rem;">
+                        Station #{{ fav.station_number }}
+                        &nbsp;·&nbsp;
+                        Added {{ fav.added_at.strftime('%d %b %Y') if fav.added_at else '' }}
+                    </div>
+                </div>
+                <button
+                    onclick="removeFavourite({{ fav.station_number }}, this)"
+                    style="
+                        background: none;
+                        border: var(--border-thick);
+                        border-radius: var(--radius-md);
+                        padding: 0.25rem 0.6rem;
+                        font-family: 'Poppins', sans-serif;
+                        font-size: 0.78rem;
+                        font-weight: 700;
+                        cursor: pointer;
+                        color: var(--primary);
+                        white-space: nowrap;
+                        transition: background 0.12s;
+                    "
+                    onmouseover="this.style.background='#fff0f0'"
+                    onmouseout="this.style.background='none'"
+                    aria-label="Remove {{ fav.station_name }} from favourites"
+                >Remove</button>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <div class="card" style="max-width: 520px; text-align: center; color: #777;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">♡</div>
+            <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem;">No favourites yet</p>
+            <p style="font-weight: 400; font-size: 0.85rem; margin-bottom: 1rem;">
+                Tap the ♥ on any station card or map popup to save it here.
+            </p>
+            <a href="/" class="btn btn-sm" style="background: var(--secondary);">Browse the Map</a>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+function removeFavourite(stationNumber, btn) {
+    fetch(`/auth/favorites/${stationNumber}`, { method: 'DELETE' })
+        .then(r => r.json())
+        .then(() => {
+            const item = document.getElementById(`fav-item-${stationNumber}`);
+            if (item) item.remove();
+
+            // Update the count badge
+            const list  = document.getElementById('fav-list');
+            const badge = document.querySelector('.badge[style*="var(--primary)"]');
+            if (badge && list) badge.textContent = list.children.length;
+        })
+        .catch(err => console.error('Remove favourite failed:', err));
+}
+</script>
+{% endblock %}
