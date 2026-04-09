@@ -1,3 +1,8 @@
+// Read config injected by the template
+const _cfg = document.getElementById('app-config').dataset;
+window.IS_LOGGED_IN = _cfg.loggedIn === 'true';
+window.MAP_ID       = _cfg.mapId;
+
 // Initialize and add the map
 function initMap() {
     const dublin = { lat: 53.35014, lng: -6.266155 };
@@ -14,8 +19,15 @@ function initMap() {
     map = new google.maps.Map(document.getElementById("map"), {
         zoom: 14,
         center: dublin,
-        mapId: 'DEMO_MAP_ID',
+        mapId: window.MAP_ID,
         gestureHandling: 'greedy',
+        zoomControl: true,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        rotateControl: false,
+        scaleControl: false,
+        clickableIcons: false,
     });
 
     // Expose stations promise — nearby.js uses it to avoid a duplicate fetch
@@ -39,10 +51,9 @@ function addMarkers(stations) {
 
     for (const station of stations) {
         const live   = (window.nearbyLiveData || {})[station.number] || {};
-        const bikes  = live.available_bikes           !== undefined ? live.available_bikes           : '–';
-        const stands = live.available_bike_stands     !== undefined ? live.available_bike_stands     : '–';
+        const bikes  = live.available_bikes       !== undefined ? live.available_bikes       : '–';
+        const stands = live.available_bike_stands !== undefined ? live.available_bike_stands : '–';
 
-        // Mini badge shown on the map
         const badge = document.createElement('div');
         badge.className = 'station-badge';
         badge.innerHTML = `<span>🚲 ${bikes}</span><span class="badge-divider">|</span><span>🅿️ ${stands}</span>`;
@@ -64,11 +75,22 @@ function addMarkers(stations) {
 
             if (window.nearbySetActive) window.nearbySetActive(station.number);
 
+            const isFav = window.IS_LOGGED_IN && window.userFavorites && window.userFavorites.has(station.number);
+            const favBtn = window.IS_LOGGED_IN
+                ? `<button class="btn-fav${isFav ? ' fav--active' : ''}"
+                          data-fav-number="${station.number}"
+                          onclick="window.toggleFavorite(${station.number}, this)"
+                          aria-label="Toggle favourite">&#9829;</button>`
+                : '';
+
             const content = `
                 <div>
                     <div class="iw-header">
                         <div class="iw-title">${station.name}</div>
-                        <button class="iw-close" onclick="window.activeInfoWindow.close()" aria-label="Close">&#x2715;</button>
+                        <div style="display:flex;align-items:center;gap:0.3rem;">
+                            ${favBtn}
+                            <button class="iw-close" onclick="window.activeInfoWindow.close()" aria-label="Close">&#x2715;</button>
+                        </div>
                     </div>
                     <div class="iw-stats">🚲 <strong>${bikes2}</strong> bikes &nbsp;|&nbsp; 🅿️ <strong>${stands2}</strong> stands</div>
                     <div id="chart_div_${station.number}" class="iw-chart"></div>
