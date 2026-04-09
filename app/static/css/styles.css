@@ -151,6 +151,8 @@ a {
     background-color: var(--accent);
     padding: 0.25rem 0.9rem;
     border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
+    border: var(--border-thick)
 }
 
 /* ==========================================================================
@@ -302,7 +304,9 @@ body.page-map .page-content {
     padding: 0.4rem 0.9rem;
     font-size: 0.8rem;
     background-color: var(--bg-color);
-    border-color: transparent;
+    border: var(--border-thick);
+    box-shadow: var(--shadow-solid-sm);
+    /* border-color: transparent; */
 }
 
 .navbar-left-group {
@@ -333,6 +337,7 @@ body.page-map .page-content {
     cursor: pointer;
     outline: none;
     color: var(--text-color);
+    box-shadow: var(--shadow-solid-sm);
 }
 
 .page-content {
