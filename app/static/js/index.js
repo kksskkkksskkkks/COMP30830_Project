@@ -32,6 +32,14 @@ function initMap() {
 
     // Expose stations promise — nearby.js uses it to avoid a duplicate fetch
     window.stationsReady = getStations();
+
+
+    getStations().then(stations => {
+        if (stations) {
+            addMarkers(stations);
+        }
+    });
+
     getWeather();
 }
 
@@ -67,13 +75,14 @@ function addMarkers(stations) {
 
         window.stationMarkers[station.number] = marker;
 
-        // Click — open info window with chart
+        // Click — open info window with 24h prediction charts
         marker.addListener("click", () => {
-            const ld     = (window.nearbyLiveData || {})[station.number] || {};
+            const sid    = station.number;
+            const ld     = (window.nearbyLiveData || {})[sid] || {};
             const bikes2  = ld.available_bikes       !== undefined ? ld.available_bikes       : 'N/A';
             const stands2 = ld.available_bike_stands !== undefined ? ld.available_bike_stands : 'N/A';
 
-            if (window.nearbySetActive) window.nearbySetActive(station.number);
+            if (window.nearbySetActive) window.nearbySetActive(sid);
 
             const isFav = window.IS_LOGGED_IN && window.userFavorites && window.userFavorites.has(station.number);
             const favBtn = window.IS_LOGGED_IN
@@ -84,16 +93,20 @@ function addMarkers(stations) {
                 : '';
 
             const content = `
-                <div>
+                <div style="min-width: 280px;">
                     <div class="iw-header">
                         <div class="iw-title">${station.name}</div>
-                        <div style="display:flex;align-items:center;gap:0.3rem;">
-                            ${favBtn}
-                            <button class="iw-close" onclick="window.activeInfoWindow.close()" aria-label="Close">&#x2715;</button>
-                        </div>
+                        <button class="iw-close" onclick="window.activeInfoWindow.close()" aria-label="Close">&#x2715;</button>
                     </div>
-                    <div class="iw-stats">🚲 <strong>${bikes2}</strong> bikes &nbsp;|&nbsp; 🅿️ <strong>${stands2}</strong> stands</div>
-                    <div id="chart_div_${station.number}" class="iw-chart"></div>
+                    <div class="iw-stats">
+                        🚲 <strong>${bikes2}</strong> bikes &nbsp;|&nbsp; 🅿️ <strong>${stands2}</strong> stands
+                    </div>
+                    <div id="bike_pred_${sid}" class="iw-chart" style="background: #fdfaf6; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #666;">
+                        Loading bike predictions...
+                    </div>
+                    <div id="stand_pred_${sid}" class="iw-chart" style="margin-top: 10px; background: #fdfaf6; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #666;">
+                        Loading stand predictions...
+                    </div>
                 </div>
             `;
 
@@ -101,7 +114,7 @@ function addMarkers(stations) {
             window.activeInfoWindow.open(map, marker);
 
             google.maps.event.addListenerOnce(window.activeInfoWindow, 'domready', () => {
-                // Pan map so IW clears the search bar
+                // Focus/Pan adjustment
                 requestAnimationFrame(() => {
                     const iw = document.querySelector('.gm-style-iw-a');
                     const searchFloat = document.getElementById('search-float');
@@ -115,13 +128,43 @@ function addMarkers(stations) {
                     }
                 });
 
-                fetch(`/db/available/${station.number}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        google.charts.setOnLoadCallback(() => drawChart(data.available, station.number));
+                // Get current local time for backend (YYYY-MM-DD HH:MM:SS)
+                const now = new Date();
+                const d = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                const t = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
+
+                console.log(`[ML] Fetching predictions for station ${sid} at ${d} ${t}`);
+
+                // 1. Fetch Bike Prediction
+                fetch(`/predict/bike/24h?station_id=${sid}&date=${d}&time=${t}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.status === "success" && res.chart_data) {
+                            drawPredictionChart(res.chart_data, `bike_pred_${sid}`, "Predicted Available Bikes", "#4285F4");
+                        } else {
+                            document.getElementById(`bike_pred_${sid}`).innerText = "Bike data unavailable";
+                            console.warn("Bike ML error:", res);
+                        }
                     })
-                    .catch((error) => {
-                        console.error(`Error fetching data for station ${station.number}:`, error);
+                    .catch(err => {
+                        document.getElementById(`bike_pred_${sid}`).innerText = "Fetch error";
+                        console.error("Bike fetch failed:", err);
+                    });
+
+                // 2. Fetch Stand Prediction
+                fetch(`/predict/stand/24h?station_id=${sid}&date=${d}&time=${t}`)
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.status === "success" && res.chart_data) {
+                            drawPredictionChart(res.chart_data, `stand_pred_${sid}`, "Predicted Empty Stands", "#EA4335");
+                        } else {
+                            document.getElementById(`stand_pred_${sid}`).innerText = "Stand data unavailable";
+                            console.warn("Stand ML error:", res);
+                        }
+                    })
+                    .catch(err => {
+                        document.getElementById(`stand_pred_${sid}`).innerText = "Fetch error";
+                        console.error("Stand fetch failed:", err);
                     });
             });
         });
@@ -133,35 +176,47 @@ function addMarkers(stations) {
     }
 }
 
-// Function to draw the chart using Google Charts
-function drawChart(data, stationId) {
-    const chartData = new google.visualization.DataTable();
+// Draw prediction chart from ML backend
+function drawPredictionChart(chartData, containerId, label, color) {
+    if (!chartData || !chartData.labels) return;
 
-    chartData.addColumn('datetime', 'Time');
-    chartData.addColumn('number', 'Available Bikes');
+    const dataTable = new google.visualization.DataTable();
+    dataTable.addColumn('datetime', 'Time');
+    dataTable.addColumn('number', label);
 
-    data.forEach((entry) => {
-        chartData.addRow([
-            new Date(entry.last_update),
-            entry.available_bikes,
-        ]);
+    const labels = chartData.labels;
+    // data_available_bikes for bike route, data_empty_stands for stand route
+    const values = chartData.data_available_bikes || chartData.data_empty_stands || [];
+
+    if (labels.length === 0) {
+        document.getElementById(containerId).innerText = "No data available";
+        return;
+    }
+
+    labels.forEach((ts, i) => {
+        dataTable.addRow([new Date(ts), values[i] || 0]);
     });
 
     const options = {
-        title: `Available Bikes at Station ${stationId}`,
-        hAxis: { title: 'Time', format: 'HH:mm' },
-        vAxis: { title: 'Available Bikes' },
-        curveType: 'function',
-        legend: { position: 'bottom' },
+        title: label,
+        hAxis: { format: 'HH:mm', gridlines: { count: 3 }, textStyle: { fontSize: 10 } },
+        vAxis: { minValue: 0, textStyle: { fontSize: 10 } },
+        colors: [color],
+        legend: 'none',
         width: 280,
-        height: 150,
+        height: 140,
+        chartArea: { width: '80%', height: '70%' },
+        backgroundColor: 'transparent'
     };
 
-    const chart = new google.visualization.LineChart(
-        document.getElementById(`chart_div_${stationId}`)
-    );
+    const container = document.getElementById(containerId);
+    if (!container) return;
 
-    chart.draw(chartData, options);
+    // Clear loading text
+    container.innerHTML = '';
+
+    const chart = new google.visualization.LineChart(container);
+    chart.draw(dataTable, options);
 }
 
 
@@ -174,8 +229,14 @@ function getWeather() {
 }
 
 function displayWeather(data) {
-    console.log("This is what I received:", data);
-    console.log("This is what I received:", data.current.temp);
+    console.log("Full data received:", data);
+
+    if (!data || !data.current) {
+        console.error("error data structure or fail fetch data");
+        document.getElementById("weather").innerHTML = "Weather data unavailable";
+        return;
+    }
+
     const weatherDiv = document.getElementById("weather");
     weatherDiv.innerHTML = `
         <div style="font-weight: bold;">Dublin Weather</div>
