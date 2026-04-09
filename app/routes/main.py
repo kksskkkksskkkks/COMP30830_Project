@@ -20,7 +20,7 @@ cache = Cache()
 
 @main_bp.route("/")
 def home():
-    return render_template("index.html", MAP_KEY=Config.MAP_KEY)
+    return render_template("index.html", MAP_KEY=Config.MAP_KEY, MAP_ID=Config.MAP_ID)
 
 @main_bp.route("/safety")
 def safety():
@@ -29,6 +29,32 @@ def safety():
 @main_bp.route("/faq")
 def faq():
     return render_template("faq.html")
+
+@main_bp.route("/account")
+def account():
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    from sqlalchemy import text as sql_text
+    engine = get_db()
+    uid = session['user_id']
+    with engine.connect() as conn:
+        user = dict(conn.execute(
+            sql_text("SELECT user_id, full_name, preferred_language, created_at FROM users WHERE user_id = :uid"),
+            {"uid": uid}
+        ).fetchone()._mapping)
+        rows = conn.execute(
+            sql_text("""
+                SELECT f.station_number, s.name AS station_name, f.added_at
+                FROM user_favorites f
+                JOIN station s ON s.number = f.station_number
+                WHERE f.user_id = :uid
+                ORDER BY f.added_at DESC
+            """),
+            {"uid": uid}
+        ).fetchall()
+        favorites = [dict(r._mapping) for r in rows]
+    return render_template('account.html', user=user, favorites=favorites)
+
 
 @main_bp.route("/bike/plot")
 def bike_plot():
