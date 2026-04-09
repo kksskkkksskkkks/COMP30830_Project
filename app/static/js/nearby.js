@@ -17,6 +17,11 @@
     const DUBLIN_CENTER = { lat: 53.3498, lng: -6.2603 };
     const PAGE_SIZE     = 20;
 
+    // Fetch live bike data at module evaluation time — consumed by initNearby via window.bikesReady
+    window.bikesReady = fetch('/api/bikes')
+        .then(r => r.json())
+        .then(d => { d.forEach(s => { liveData[s.number] = s; }); window.nearbyLiveData = liveData; });
+
     // ── Hook into initMap without modifying index.js ───────────────────────────
     const _origInitMap = window.initMap;
     window.initMap = function () {
@@ -62,12 +67,18 @@
         // Use the stations promise from index.js (no duplicate fetch) + live data + favorites
         Promise.all([
             window.stationsReady.then(stations => { allStations = stations || []; }),
-            fetch('/api/bikes').then(r => r.json()).then(d => { d.forEach(s => { liveData[s.number] = s; }); window.nearbyLiveData = liveData; }),
+            window.bikesReady,
             loadFavorites(),
         ]).then(() => {
             addMarkers(allStations);   // markers created after live data is ready — badges show accurate counts
             runNearbySearch(DUBLIN_CENTER.lat, DUBLIN_CENTER.lng);
-        }).catch(err => console.error('[nearby] data fetch failed:', err));
+        }).catch(err => {
+            console.error('[nearby] data fetch failed:', err);
+            if (allStations.length) {
+                addMarkers(allStations);
+                runNearbySearch(DUBLIN_CENTER.lat, DUBLIN_CENTER.lng);
+            }
+        });
     }
 
     // ── Favourites ─────────────────────────────────────────────────────────────

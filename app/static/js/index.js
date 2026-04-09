@@ -32,13 +32,7 @@ function initMap() {
 
     // Expose stations promise — nearby.js uses it to avoid a duplicate fetch
     window.stationsReady = getStations();
-
-
-    getStations().then(stations => {
-        if (stations) {
-            addMarkers(stations);
-        }
-    });
+    
 
     getWeather();
 }
