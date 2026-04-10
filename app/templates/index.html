@@ -294,6 +294,9 @@
 {% endblock %}
 
 {% block scripts %}
+    <meta id="app-config"
+          data-logged-in="{{ (session.get('user_id') is not none) | tojson }}"
+          data-map-id="{{ MAP_ID }}">
     <script src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
     <script src="{{ url_for('static', filename='js/nearby.js') }}"></script>

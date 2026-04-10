@@ -111,16 +111,7 @@ def register():
 
     return redirect(url_for('auth.login'))
 
-
-
-
-
-
-
-
 # User Favorites CRUD Functionality
-
-
 # 1. Add to Favorites
 @auth_bp.route('/favorites', methods=['POST'])
 def add_favorite():
@@ -167,14 +158,15 @@ def get_my_favorites():
 
     with engine.connect() as conn:
         query = text("""
-                     SELECT f.favorite_id, f.station_number, f.added_at
+                     SELECT f.favorite_id, f.station_number, s.name AS station_name, f.added_at
                      FROM user_favorites f
+                     JOIN station s ON s.number = f.station_number
                      WHERE f.user_id = :user_id
                      ORDER BY f.added_at DESC
                      """)
         results = conn.execute(query, {"user_id": user_id}).fetchall()
 
-        favorites = [dict(row.items()) for row in results]
+        favorites = [dict(row._mapping) for row in results]
 
     return jsonify({
         'user_id': user_id,
