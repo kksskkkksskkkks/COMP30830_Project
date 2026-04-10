@@ -344,20 +344,12 @@ body.page-map .page-content {
     overflow-y: auto;
 }
 
-/* ── Floating search box (centered above visible map area) ───────────────── */
-#search-float {
-    position: absolute;
-    top: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 15;
-    width: min(320px, calc(100% - 2rem));
-    transition: left 0.28s ease;
-}
-
-/* When panel is open, re-centre over the map portion (map starts at 300px) */
-#btn-panel-toggle.panel-open ~ #search-float {
-    left: calc(150px + 50%);
+/* ── Search box inside the panel ─────────────────────────────────────────── */
+#search-box-area {
+    padding: 0.6rem;
+    border-bottom: var(--border-thick);
+    flex-shrink: 0;
+    position: relative;
 }
 
 #search-group {
@@ -416,9 +408,45 @@ body.page-map .page-content {
     font-size: 0.9rem;
 }
 
-/* Google Places autocomplete z-index */
-.pac-container {
-    z-index: 9999 !important;
+/* ── Map search box
+ suggestions dropdown ─────────────────────────────────────── */
+#search-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-color);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
+    list-style: none;
+    padding: 0.3rem 0;
+    z-index: 9999;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+#search-suggestions.hidden {
+    display: none;
+}
+
+#search-suggestions li {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid #eee;
+}
+
+#search-suggestions li:last-child {
+    border-bottom: none;
+}
+
+#search-suggestions li:hover {
+    background: var(--accent);
 }
 
 /* ── App layout ───────────────────────────────────────────────────────────── */
@@ -580,10 +608,11 @@ body.page-map .page-content {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     font-size: 0.78rem;
     color: var(--text-color);
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .sc-distance {
@@ -708,6 +737,11 @@ body.page-map .page-content {
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+    white-space: nowrap;
 }
 
 .iw-chart {
@@ -715,6 +749,42 @@ body.page-map .page-content {
     height: 150px;
 }
 
+
+/* ── Search origin pin ───────────────────────────────────────────────────── */
+.search-pin {
+    display: block;
+    width: 41px;
+    height: 57px;
+    /* Shift left to centre horizontally; shift up so the SVG tip lands on the coordinate.
+       The visual tip is ~3px above the element bottom (SVG viewBox padding), so +3px compensates. */
+    transform: translate(-50%, calc(-100% + 3px));
+    filter: drop-shadow(2px 3px 0px #111111);
+    pointer-events: none;
+}
+
+/* ── Bike / parking icon images ─────────────────────────────────────────── */
+.badge-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.sc-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.stat-icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    display: inline-block;
+}
 
 /* ── Map station badge (AdvancedMarkerElement content) ───────────────────── */
 .station-badge {

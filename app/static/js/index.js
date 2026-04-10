@@ -64,7 +64,7 @@ function addMarkers(stations) {
 
         const badge = document.createElement('div');
         badge.className = 'station-badge';
-        badge.innerHTML = `<span>🚲 ${bikes}</span><span class="badge-divider">|</span><span>🅿️ ${stands}</span>`;
+        badge.innerHTML = `<img src="/static/bike_icon.svg" class="badge-icon" alt="bikes"><span>${bikes}</span><span class="badge-divider">|</span><img src="/static/parking_icon.png" class="badge-icon" alt="stands"><span>${stands}</span>`;
 
         const marker = new google.maps.marker.AdvancedMarkerElement({
             position: { lat: station.lat, lng: station.lng },
@@ -77,6 +77,7 @@ function addMarkers(stations) {
 
         // Click — open info window with 24h prediction charts
         marker.addListener("click", () => {
+            if (window.clearSearchPin) window.clearSearchPin();
             const sid    = station.number;
             const ld     = (window.nearbyLiveData || {})[sid] || {};
             const bikes2  = ld.available_bikes       !== undefined ? ld.available_bikes       : 'N/A';
@@ -99,7 +100,7 @@ function addMarkers(stations) {
                         <button class="iw-close" onclick="window.activeInfoWindow.close()" aria-label="Close">&#x2715;</button>
                     </div>
                     <div class="iw-stats">
-                        🚲 <strong>${bikes2}</strong> bikes &nbsp;|&nbsp; 🅿️ <strong>${stands2}</strong> stands
+                        <img src="/static/bike_icon.svg" class="stat-icon" alt="Bike"> <strong>${bikes2}</strong> bikes &nbsp;|&nbsp; <img src="/static/parking_icon.png" class="stat-icon" alt="Parking"> <strong>${stands2}</strong> stands
                     </div>
                     <div id="bike_pred_${sid}" class="iw-chart" style="background: #fdfaf6; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #666;">
                         Loading bike predictions...
@@ -114,20 +115,6 @@ function addMarkers(stations) {
             window.activeInfoWindow.open(map, marker);
 
             google.maps.event.addListenerOnce(window.activeInfoWindow, 'domready', () => {
-                // Focus/Pan adjustment
-                requestAnimationFrame(() => {
-                    const iw = document.querySelector('.gm-style-iw-a');
-                    const searchFloat = document.getElementById('search-float');
-                    if (iw && searchFloat) {
-                        const iwTop = iw.getBoundingClientRect().top;
-                        const searchBottom = searchFloat.getBoundingClientRect().bottom;
-                        const gap = 16;
-                        if (iwTop < searchBottom + gap) {
-                            window.map.panBy(0, -(searchBottom + gap - iwTop));
-                        }
-                    }
-                });
-
                 // Get current local time for backend (YYYY-MM-DD HH:MM:SS)
                 const now = new Date();
                 const d = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
