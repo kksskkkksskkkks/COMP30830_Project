@@ -124,11 +124,16 @@ def get_all_stations_current(): # Originally called "bikes()"
 # 1.4 get specific station availiability from DB
 @main_bp.route('/db/available/<int:station_id>')
 def get_specific_station(station_id):
+    from sqlalchemy import text as sql_text
     engine = get_db()
     data = []
-    rows = engine.execute("SELECT available_bikes from availability where number = {};".format(station_id))
-    for row in rows:
-        data.append(dict(row))
+    with engine.connect() as conn:
+        rows = conn.execute(
+            sql_text("SELECT available_bikes FROM availability WHERE number = :station_id"),
+            {"station_id": station_id}
+        )
+        for row in rows:
+            data.append(dict(row))
     return jsonify(available=data)
 
 
