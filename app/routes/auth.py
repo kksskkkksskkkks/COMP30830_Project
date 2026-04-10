@@ -9,8 +9,7 @@ from config import Config
 auth_bp = Blueprint('auth', __name__)
 
 
-# 1. Interceptor: Executes before each request reaches a route
-@auth_bp.before_request
+# 1. Interceptor: runs on all routes via app.before_request (registered in create_app)
 def load_logged_in_user():
     """
     Checks if a user ID exists in the session.
