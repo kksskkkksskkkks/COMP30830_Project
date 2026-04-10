@@ -136,7 +136,7 @@ def get_specific_station(station_id):
 # ✅ 2.1 Scrape/fetch from API
 # ====== TODO: Request periodically without user's action? ======
 def get_weather():
-    response = requests.get("https://api.openweathermap.org/data/2.5/weather", params={"appid": Config.WEATHER_KEY, "q": "dublin, ie"})
+    response = requests.get("https://api.openweathermap.org/data/2.5/weather", params={"appid": Config.WEATHER_KEY, "q": "dublin, ie", "units": "metric"})
     return response.json() if response.status_code == 200 else {}
 
 

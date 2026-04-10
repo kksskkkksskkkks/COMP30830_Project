@@ -222,7 +222,7 @@ function drawPredictionChart(chartData, containerId, label, color) {
 
 // Get current weather
 function getWeather() {
-    fetch("/db/weather/current")
+    fetch("/api/weather")
     .then((response) => response.json())
     .then((data) => displayWeather(data))
     .catch((error) => console.error("Error fetching weather data:", error));
@@ -239,8 +239,11 @@ function displayWeather(data) {
 
     const weatherDiv = document.getElementById("weather");
     weatherDiv.innerHTML = `
-        <div style="font-weight: bold;">Dublin Weather</div>
-        <div style="font-size: 1.2em;">${Math.round(data.current.feels_like)}°C</div>
-        <div style="text-transform: capitalize;">${data.current.weather[0].description}</div>
-    `;
+    <div style="font-weight: bold;">Dublin Weather</div>
+    <div style="display: flex; align-items: center; gap: 0px; line-height: 1;">
+        <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" style="width: 50px; height: 50px;">
+        <span style="font-size: 1.2em;">${Math.round(data.main.temp)}°C</span>
+    </div>
+    <div style="text-transform: capitalize;">${data.weather[0].description}</div>
+`;
 }
