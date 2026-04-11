@@ -14,6 +14,7 @@ Each test class covers one route with three scenarios:
 
 import unittest
 from unittest.mock import patch, MagicMock
+from datetime import datetime
 
 from app import create_app
 from config import TestingConfig
@@ -77,15 +78,19 @@ class TestApiBikes(unittest.TestCase):
     # ------------------------------------------------------------------
     # Happy path
     # ------------------------------------------------------------------
+    @patch("app.routes.main.get_db")
     @patch("app.routes.main.requests.get")
-    def test_bikes_happy_path(self, mock_get):
+    def test_bikes_happy_path(self, mock_get, mock_get_db):
         """
         When JCDecaux responds HTTP 200 with station data, /api/bikes must
         return 200 and a JSON array that preserves the expected fields.
         This confirms the route correctly forwards the external payload
         through jsonify() without mutation.
+        get_db is patched because the route persists results to DB after a
+        successful API fetch.
         """
         mock_get.return_value = _mock_response(200, FAKE_BIKES)
+        mock_get_db.return_value = MagicMock()
 
         response = self.client.get("/api/bikes")
 
@@ -110,8 +115,9 @@ class TestApiBikes(unittest.TestCase):
     # ------------------------------------------------------------------
     # Empty response — API returns [] (no stations active)
     # ------------------------------------------------------------------
+    @patch("app.routes.main.get_db")
     @patch("app.routes.main.requests.get")
-    def test_bikes_empty_response(self, mock_get):
+    def test_bikes_empty_response(self, mock_get, mock_get_db):
         """
         When JCDecaux returns HTTP 200 with an empty list (e.g. all stations
         offline or a maintenance window), /api/bikes must still return 200
@@ -119,6 +125,7 @@ class TestApiBikes(unittest.TestCase):
         This guards against any code that assumes at least one station exists.
         """
         mock_get.return_value = _mock_response(200, [])
+        mock_get_db.return_value = MagicMock()
 
         response = self.client.get("/api/bikes")
 
@@ -130,8 +137,9 @@ class TestApiBikes(unittest.TestCase):
     # ------------------------------------------------------------------
     # Correct URL — verify the right endpoint and contract are used
     # ------------------------------------------------------------------
+    @patch("app.routes.main.get_db")
     @patch("app.routes.main.requests.get")
-    def test_bikes_calls_correct_url(self, mock_get):
+    def test_bikes_calls_correct_url(self, mock_get, mock_get_db):
         """
         Asserts that get_bike_data() hits the exact JCDecaux v1 stations
         endpoint with contract='dublin'.  Protects against URL regressions
@@ -139,6 +147,7 @@ class TestApiBikes(unittest.TestCase):
         return data for a different city.
         """
         mock_get.return_value = _mock_response(200, FAKE_BIKES)
+        mock_get_db.return_value = MagicMock()
 
         self.client.get("/api/bikes")
 
@@ -172,15 +181,19 @@ class TestApiWeather(unittest.TestCase):
     # ------------------------------------------------------------------
     # Happy path
     # ------------------------------------------------------------------
+    @patch("app.routes.main.get_db")
     @patch("app.routes.main.requests.get")
-    def test_weather_happy_path(self, mock_get):
+    def test_weather_happy_path(self, mock_get, mock_get_db):
         """
         When OpenWeather responds HTTP 200 with a full weather object,
         /api/weather must return 200 and a JSON dict that contains the
         standard top-level keys (weather, main, wind, name).
         Confirms the route forwards the payload without stripping fields.
+        get_db is patched because the route persists results to DB after a
+        successful API fetch.
         """
         mock_get.return_value = _mock_response(200, FAKE_WEATHER)
+        mock_get_db.return_value = MagicMock()
 
         response = self.client.get("/api/weather")
 
@@ -202,8 +215,9 @@ class TestApiWeather(unittest.TestCase):
     # ------------------------------------------------------------------
     # Empty response — API returns {} (service hiccup)
     # ------------------------------------------------------------------
+    @patch("app.routes.main.get_db")
     @patch("app.routes.main.requests.get")
-    def test_weather_empty_response(self, mock_get):
+    def test_weather_empty_response(self, mock_get, mock_get_db):
         """
         When OpenWeather returns HTTP 200 with an empty dict, /api/weather
         must still return 200 and an empty JSON object.
@@ -212,6 +226,7 @@ class TestApiWeather(unittest.TestCase):
         fallback branch indirectly.
         """
         mock_get.return_value = _mock_response(200, {})
+        mock_get_db.return_value = MagicMock()
 
         response = self.client.get("/api/weather")
 
@@ -223,8 +238,9 @@ class TestApiWeather(unittest.TestCase):
     # ------------------------------------------------------------------
     # Correct URL — verify the right endpoint and city are queried
     # ------------------------------------------------------------------
+    @patch("app.routes.main.get_db")
     @patch("app.routes.main.requests.get")
-    def test_weather_calls_correct_url(self, mock_get):
+    def test_weather_calls_correct_url(self, mock_get, mock_get_db):
         """
         Asserts that get_weather() hits the exact OpenWeather 2.5 endpoint
         with q='dublin, ie'.  Protects against URL regressions or accidental
@@ -232,6 +248,7 @@ class TestApiWeather(unittest.TestCase):
         weather for a different location.
         """
         mock_get.return_value = _mock_response(200, FAKE_WEATHER)
+        mock_get_db.return_value = MagicMock()
 
         self.client.get("/api/weather")
 
@@ -259,6 +276,19 @@ def _fake_engine(rows):
     mock_engine = MagicMock()
     mock_engine.execute.return_value = rows
     return mock_engine
+
+
+def _fake_engine_connect(rows):
+    """
+    Return a MagicMock SQLAlchemy engine whose engine.connect() context
+    manager yields a connection whose .execute() returns rows directly.
+    Used for routes that use 'with engine.connect() as conn: conn.execute()'.
+    Each row is a plain dict so dict(row) works correctly.
+    """
+    engine = MagicMock()
+    conn = engine.connect.return_value.__enter__.return_value
+    conn.execute.return_value = rows
+    return engine
 
 
 # ---------------------------------------------------------------------------
@@ -470,8 +500,10 @@ class TestDbAvailableStation(unittest.TestCase):
         'available' list containing one dict per historical reading.
         Confirms the station_id is used as a filter and the per-row
         dict conversion works on the narrower result set.
+        Uses _fake_engine_connect because the route uses engine.connect()
+        context manager after the SQL injection fix.
         """
-        mock_get_db.return_value = _fake_engine(FAKE_STATION_AVAIL_ROWS)
+        mock_get_db.return_value = _fake_engine_connect(FAKE_STATION_AVAIL_ROWS)
 
         response = self.client.get("/db/available/42")
 
@@ -497,7 +529,7 @@ class TestDbAvailableStation(unittest.TestCase):
         'available'.  This is a normal state (new station, not yet scraped)
         and must not cause a crash or a 404.
         """
-        mock_get_db.return_value = _fake_engine([])
+        mock_get_db.return_value = _fake_engine_connect([])
 
         response = self.client.get("/db/available/99")
 
@@ -523,10 +555,11 @@ class TestDbAvailableStation(unittest.TestCase):
 
 
 # ===========================================================================
-# GET /db/weather/current
+# [NOT IN USE] GET /db/weather/current
+# Weather info access has moved api
 # ===========================================================================
 class TestDbWeatherCurrent(unittest.TestCase):
-    """Tests for GET /db/weather/current  (reads from the `current` table)."""
+    # Tests for GET /db/weather/current  (reads from the `current` table).
 
     @classmethod
     def setUpClass(cls):
@@ -586,6 +619,299 @@ class TestDbWeatherCurrent(unittest.TestCase):
         data = response.get_json()
         self.assertIn("weather_current", data)
         self.assertEqual(data["weather_current"], [])
+
+# ===========================================================================
+# GET /api/geocode
+# ===========================================================================
+
+PHOTON_FEATURE = {
+    "properties": {
+        "name": "Trinity College",
+        "street": "College Green",
+        "district": "Dublin 2",
+        "suburb": None,
+    },
+    "geometry": {"coordinates": [-6.2546, 53.3438]},   # [lng, lat]
+}
+
+
+def _photon_response(features):
+    """Return a MagicMock requests.Response with a Photon-style GeoJSON body."""
+    mock = MagicMock()
+    mock.json.return_value = {"features": features}
+    return mock
+
+
+class TestApiGeocode(unittest.TestCase):
+    """Tests for GET /api/geocode  (proxies Photon address search for Dublin)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.app = create_app(TestingConfig)
+        cls.client = cls.app.test_client()
+
+    def setUp(self):
+        with self.app.app_context():
+            cache.clear()
+
+    # ------------------------------------------------------------------
+    # Happy path — Photon returns a feature
+    # ------------------------------------------------------------------
+    @patch("app.routes.main.requests.get")
+    def test_geocode_happy_path(self, mock_get):
+        """
+        When Photon returns one feature, /api/geocode must return 200 and
+        a JSON list with one result that has 'name', 'lat', and 'lng'.
+        The name is assembled from the feature's name, street, and district
+        properties; coordinates are extracted in (lat, lng) order from the
+        GeoJSON [lng, lat] array.
+        """
+        mock_get.return_value = _photon_response([PHOTON_FEATURE])
+
+        response = self.client.get("/api/geocode?q=Trinity+College")
+
+        self.assertEqual(response.status_code, 200)
+        data = response.get_json()
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 1)
+        result = data[0]
+        self.assertIn("name", result)
+        self.assertIn("lat", result)
+        self.assertIn("lng", result)
+        self.assertAlmostEqual(result["lat"], 53.3438)
+        self.assertAlmostEqual(result["lng"], -6.2546)
+        self.assertIn("Trinity College", result["name"])
+
+    # ------------------------------------------------------------------
+    # Empty query string — no Photon call, immediate []
+    # ------------------------------------------------------------------
+    def test_geocode_empty_query(self):
+        """
+        When q is an empty string, /api/geocode must return 200 and []
+        without calling the Photon API at all.  This is enforced by the
+        'if not q: return jsonify([])' guard at the top of the route.
+        """
+        response = self.client.get("/api/geocode?q=")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), [])
+
+    # ------------------------------------------------------------------
+    # Missing q parameter — treated as empty
+    # ------------------------------------------------------------------
+    def test_geocode_missing_query_param(self):
+        """
+        When the q parameter is absent entirely, request.args.get('q', '')
+        returns '' and the route returns [] without hitting Photon.
+        """
+        response = self.client.get("/api/geocode")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), [])
+
+    # ------------------------------------------------------------------
+    # Photon returns no features — location not found
+    # ------------------------------------------------------------------
+    @patch("app.routes.main.requests.get")
+    def test_geocode_no_features(self, mock_get):
+        """
+        When Photon finds no matches (empty 'features' list), /api/geocode
+        must return 200 and [] without raising an error.
+        """
+        mock_get.return_value = _photon_response([])
+
+        response = self.client.get("/api/geocode?q=xyznonexistentplace")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), [])
+
+    # ------------------------------------------------------------------
+    # Photon unreachable — exception swallowed, returns []
+    # ------------------------------------------------------------------
+    @patch("app.routes.main.requests.get")
+    def test_geocode_photon_down(self, mock_get):
+        """
+        When requests.get raises (e.g. timeout, connection error), the route's
+        except-clause must catch it and return 200 with [] so the frontend
+        degrades gracefully rather than showing a 500 error.
+        """
+        mock_get.side_effect = Exception("Connection timeout")
+
+        response = self.client.get("/api/geocode?q=Grafton+Street")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), [])
+
+
+# ===========================================================================
+# Page routes — smoke tests
+# ===========================================================================
+class TestPageRoutes(unittest.TestCase):
+    """
+    Smoke tests for pages that render templates with no DB interaction
+    (/, /safety, /faq) and for auth-guarded pages (/bike/plot, /bike/number).
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.app = create_app(TestingConfig)
+
+    def setUp(self):
+        # Fresh client per test so session state from authenticated tests
+        # never leaks into unauthenticated tests in the same class.
+        with self.app.app_context():
+            cache.clear()
+        self.client = self.app.test_client()
+
+    # ------------------------------------------------------------------
+    # Public pages — no session required, no DB call
+    # ------------------------------------------------------------------
+    def test_home_returns_200(self):
+        """GET / must return 200 with no session and no DB interaction."""
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_safety_returns_200(self):
+        """GET /safety must return 200."""
+        response = self.client.get("/safety")
+        self.assertEqual(response.status_code, 200)
+
+    def test_faq_returns_200(self):
+        """GET /faq must return 200."""
+        response = self.client.get("/faq")
+        self.assertEqual(response.status_code, 200)
+
+    # ------------------------------------------------------------------
+    # Bike ML pages - unauthenticated
+    # ------------------------------------------------------------------
+    def test_bike_plot_unauthenticated_redirects(self):
+        """
+        GET /bike/plot without a session must redirect to /auth/login (302).
+        """
+        response = self.client.get("/bike/plot")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/auth/login", response.headers["Location"])
+
+    def test_bike_number_unauthenticated_redirects(self):
+        """
+        GET /bike/number without a session must redirect to /auth/login (302).
+        """
+        response = self.client.get("/bike/number")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/auth/login", response.headers["Location"])
+
+    # ------------------------------------------------------------------
+    # Bike ML pages — authenticated
+    # ------------------------------------------------------------------
+    @patch("app.routes.auth.get_db")   # load_logged_in_user (before_request) calls get_db to populate g.user
+    def test_bike_plot_authenticated_returns_200(self, mock_get_db):
+        """
+        When a user is logged in, GET /bike/plot must return 200 and render the bike_plot template.
+        """
+        engine = MagicMock()
+        conn = engine.connect.return_value.__enter__.return_value
+        user_row = MagicMock()
+        user_row._mapping = {"user_id": "testuser", "full_name": "Test User",
+                             "preferred_language": "en", "created_at": "2024-01-01"}
+        conn.execute.return_value.fetchone.return_value = user_row
+        mock_get_db.return_value = engine
+
+        with self.client.session_transaction() as sess:
+            sess["user_id"] = "testuser"
+
+        response = self.client.get("/bike/plot")
+        self.assertEqual(response.status_code, 200)
+
+    @patch("app.routes.auth.get_db")
+    def test_bike_number_authenticated_returns_200(self, mock_get_db):
+        """
+        When a user is logged in, GET /bike/number must return 200 and render
+        the bike_return_number template.
+        """
+        engine = MagicMock()
+        conn = engine.connect.return_value.__enter__.return_value
+        user_row = MagicMock()
+        user_row._mapping = {"user_id": "testuser", "full_name": "Test User",
+                             "preferred_language": "en", "created_at": "2024-01-01"}
+        conn.execute.return_value.fetchone.return_value = user_row
+        mock_get_db.return_value = engine
+
+        with self.client.session_transaction() as sess:
+            sess["user_id"] = "testuser"
+
+        response = self.client.get("/bike/number")
+        self.assertEqual(response.status_code, 200)
+
+
+# ===========================================================================
+# GET /account
+# ===========================================================================
+
+FAKE_USER_ACCOUNT = {
+    "user_id": "testuser",
+    "full_name": "Test User",
+    "preferred_language": "en",
+    "created_at": datetime(2024, 1, 1),   # template calls .strftime() on this
+}
+
+FAKE_FAV_ROW_MAPPING = {
+    "station_number": 42,
+    "station_name": "GRAFTON ST",
+    "added_at": datetime(2024, 1, 10),    # template calls .strftime() on this
+}
+
+
+class TestAccount(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = create_app(TestingConfig)
+
+    def setUp(self):
+        with self.app.app_context():
+            cache.clear()
+        self.client = self.app.test_client()
+
+    # ------------------------------------------------------------------
+    # Unauthenticated — redirect to login
+    # ------------------------------------------------------------------
+    def test_account_unauthenticated_redirects(self):
+        """
+        GET /account without a session must redirect to /auth/login (302).
+        """
+        response = self.client.get("/account")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/auth/login", response.headers["Location"])
+
+    # ------------------------------------------------------------------
+    # Authenticated — renders page with user data and favorites
+    # ------------------------------------------------------------------
+    @patch("app.routes.main.get_db")
+    @patch("app.routes.auth.get_db")
+    def test_account_authenticated_returns_200(self, mock_auth_db, mock_main_db):
+        """
+        When a user is logged in, GET /account must return 200.
+        """
+        # Shared engine mock for before_request (auth) and route (main)
+        def _make_engine():
+            engine = MagicMock()
+            conn = engine.connect.return_value.__enter__.return_value
+            user_row = MagicMock()
+            user_row._mapping = FAKE_USER_ACCOUNT
+            conn.execute.return_value.fetchone.return_value = user_row
+            fav_row = MagicMock()
+            fav_row._mapping = FAKE_FAV_ROW_MAPPING
+            conn.execute.return_value.fetchall.return_value = [fav_row]
+            return engine
+
+        mock_auth_db.return_value = _make_engine()
+        mock_main_db.return_value = _make_engine()
+
+        with self.client.session_transaction() as sess:
+            sess["user_id"] = "testuser"
+
+        response = self.client.get("/account")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Test User", response.data)
 
 
 if __name__ == "__main__":
