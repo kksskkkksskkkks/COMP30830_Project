@@ -477,8 +477,7 @@ body.page-map .page-content {
 #btn-panel-toggle {
     position: absolute;
     left: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 12px;
     z-index: 10;
     background: var(--accent);
     border: var(--border-thick);
@@ -572,6 +571,32 @@ body.page-map .page-content {
     font-weight: 600;
 }
 
+/* ── Station list empty state ─────────────────────────────────────────────── */
+.list-empty-state {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: 2.5rem 1.5rem;
+    color: #aaa;
+    text-align: center;
+}
+
+.list-empty-state svg {
+    opacity: 0.35;
+    flex-shrink: 0;
+}
+
+.list-empty-state p {
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 0;
+    color: #888;
+}
+
 /* ── Station card ─────────────────────────────────────────────────────────── */
 .station-card {
     background: #fff;
@@ -623,31 +648,6 @@ body.page-map .page-content {
     color: var(--text-color);
 }
 
-/* "Show more" row */
-.show-more-item {
-    list-style: none;
-    text-align: center;
-    padding: 0.4rem 0 0.6rem;
-}
-
-.btn-show-more {
-    background: var(--accent);
-    border: var(--border-thick);
-    border-radius: var(--radius-md);
-    padding: 0.45rem 1.2rem;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-color);
-    cursor: pointer;
-    box-shadow: var(--shadow-solid-sm);
-    transition: transform 0.1s, box-shadow 0.1s;
-    text-transform: uppercase;
-}
-
-.btn-show-more:hover {
-    transform: scale(1.05);
-}
 
 /* ── Map fills remaining width ── */
 #map {
@@ -661,7 +661,7 @@ body.page-map .page-content {
     top: 12px;
     right: 16px;
     z-index: 15;
-    background: var(--secondary);
+    background: var(--bg-color);
     padding: 10px 14px;
     border: var(--border-thick);
     border-radius: var(--radius-md);
@@ -675,7 +675,52 @@ body.page-map .page-content {
     pointer-events: auto;
 }
 
-/* ── Google Maps Info Window — City Pop style ─────────────────────────────── */
+/* ── Walk radius circle centre point ─────────────────────────────────────── */
+.origin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+/* ── Map pin colour legend ───────────────────────────────────────────────── */
+#map-legend {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-color);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
+    padding: 0.4rem 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    z-index: 15;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    white-space: nowrap;
+}
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-color);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--border-dark);
+    flex-shrink: 0;
+}
+
+/* Google Maps Info Window */
 .gm-style .gm-style-iw-c {
     font-family: 'Poppins', sans-serif !important;
     background-color: var(--bg-color) !important;
@@ -751,26 +796,8 @@ body.page-map .page-content {
 
 
 /* ── Search origin pin ───────────────────────────────────────────────────── */
-.search-pin {
-    display: block;
-    width: 41px;
-    height: 57px;
-    /* Shift left to centre horizontally; shift up so the SVG tip lands on the coordinate.
-       The visual tip is ~3px above the element bottom (SVG viewBox padding), so +3px compensates. */
-    transform: translate(-50%, calc(-100% + 3px));
-    filter: drop-shadow(2px 3px 0px #111111);
-    pointer-events: none;
-}
 
 /* ── Bike / parking icon images ─────────────────────────────────────────── */
-.badge-icon {
-    width: 14px;
-    height: 14px;
-    vertical-align: middle;
-    display: inline-block;
-    flex-shrink: 0;
-}
-
 .sc-icon {
     width: 14px;
     height: 14px;
@@ -786,38 +813,78 @@ body.page-map .page-content {
     display: inline-block;
 }
 
-/* ── Map station badge (AdvancedMarkerElement content) ───────────────────── */
-.station-badge {
+/* ── Station pin marker ─────────────────────────────────────────────────── */
+.station-pin {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.3rem;
-    background: var(--bg-color);
-    border: var(--border-thick);
-    border-radius: var(--radius-md);
-    padding: 0.2rem 0.5rem;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--text-color);
-    box-shadow: var(--shadow-solid-sm);
-    white-space: nowrap;
+    justify-content: center;
+    width: 40px;
+    height: 52px;
     cursor: pointer;
     transition: transform 0.1s;
 }
 
-.station-badge:hover {
-    transform: scale(1.1);
+.station-pin:hover { transform: scale(1.15); }
+
+.station-pin.station-badge--active {
+    transform: scale(1.25);
+    filter: drop-shadow(0 0 4px var(--primary));
+    z-index: 500;
 }
 
-.station-badge--active {
-    box-shadow: 0 0 0 3px var(--primary);
-    transform: scale(1.2);
+/* Station pin SVG */
+.pin-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    stroke: var(--border-dark);
+    stroke-width: 2.5;
 }
 
-.badge-divider {
-    opacity: 0.4;
-    font-weight: 400;
+/* Colour by availability */
+.station-pin[data-avail="good"]    .pin-svg { fill: var(--secondary); }
+.station-pin[data-avail="empty"]   .pin-svg { fill: var(--accent); }
+.station-pin[data-avail="full"]    .pin-svg { fill: var(--primary); }
+.station-pin[data-avail="closed"]  .pin-svg { fill: #757575; }
+.station-pin[data-avail="unknown"] .pin-svg { fill: #9e9e9e; }
+
+/* Number label inside pin */
+.pin-label {
+    position: relative;
+    z-index: 1;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-top: -10px;
 }
+
+/* Compact mode */
+.station-pin.pin--compact {
+    width: 32px;
+    height: 42px;
+}
+.station-pin.pin--compact .pin-label {
+    font-size: 12px;
+    margin-top: -7px;
+}
+
+/* Dot mode */
+.station-pin.pin--dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.35);
+}
+.station-pin.pin--dot .pin-svg   { display: none; }
+.station-pin.pin--dot .pin-label { display: none; }
+
+.station-pin.pin--dot[data-avail="good"]    { background: var(--secondary); }
+.station-pin.pin--dot[data-avail="empty"]   { background: var(--accent); }
+.station-pin.pin--dot[data-avail="full"]    { background: var(--primary); }
+.station-pin.pin--dot[data-avail="closed"]  { background: #757575; }
+.station-pin.pin--dot[data-avail="unknown"] { background: #9e9e9e; }
 
 /* ── Favourite toggle button ─────────────────────────────────────────────── */
 .btn-fav {

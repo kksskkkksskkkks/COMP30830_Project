@@ -123,7 +123,7 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="app-layout" style="height: 620px;">
 
-    <div id="results-panel" role="region" aria-label="Nearby stations">
+    <div id="results-panel" class="hidden" role="region" aria-label="Nearby stations">
         <div id="panel-header">
             <span id="panel-title">Nearby Stations</span>
             <button id="btn-panel-close" aria-label="Close station list">&#x2715;</button>
@@ -147,16 +147,31 @@
                 </button>
             </div>
         </div>
-        <ul id="station-list" aria-live="polite" aria-label="Station list"></ul>
+        <ul id="station-list" aria-live="polite" aria-label="Station list">
+            <li class="list-empty-state" id="list-empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <p>Search an address or use<br>your location to find nearby stations.</p>
+            </li>
+        </ul>
     </div>
 
     <div id="map" role="application" aria-label="Dublin bike stations map"></div>
 
     <div id="map-overlay">
-        <button id="btn-panel-toggle" class="panel-open" aria-label="Close station list" aria-expanded="true" aria-controls="results-panel">
-            <span aria-hidden="true" id="toggle-icon">&#8250;</span>
+        <button id="btn-panel-toggle" aria-label="Open station search" aria-expanded="false" aria-controls="results-panel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
         </button>
         <div id="weather" aria-live="polite" aria-label="Current weather"></div>
+        <div id="map-legend" aria-label="Map pin colour legend">
+            <div class="legend-row"><span class="legend-dot" style="background:var(--secondary)"></span>Available</div>
+            <div class="legend-row"><span class="legend-dot" style="background:var(--accent)"></span>No bikes</div>
+            <div class="legend-row"><span class="legend-dot" style="background:var(--primary)"></span>Station full</div>
+            <div class="legend-row"><span class="legend-dot" style="background:#757575"></span>Closed</div>
+        </div>
     </div>
 
 </div>
