@@ -16,6 +16,11 @@ class Config:
     DB_NAME = os.getenv("DB_NAME")
     DB_URI = os.getenv("DB_URI")
 
+    # i18n
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_TRANSLATION_DIRECTORIES = 'translations'
+    LANGUAGES = ['en', 'fr', 'it', 'zh_TW', 'zh_CN', 'ja']
+
     # General
     DEBUG = False
     TESTING = False

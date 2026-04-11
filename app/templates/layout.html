@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ get_locale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,31 +11,36 @@
 </head>
 <body class="{% block body_class %}{% endblock %}">
 
-    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <a href="#main-content" class="skip-link">{{ _('Skip to main content') }}</a>
 
-    <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <nav class="navbar" role="navigation" aria-label="{{ _('Main navigation') }}">
         <div class="navbar-left-group">
-            <a class="navbar-brand" href="/">Dublin Bikes</a>
-            <a href="/safety" class="btn btn-sm">Safety</a>
-            <a href="/faq" class="btn btn-sm">FAQ</a>
+            <a class="navbar-brand" href="/" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                <img src="{{ url_for('static', filename='bike_icon.svg') }}" alt="" aria-hidden="true" style="width: 28px; height: 28px;">
+                Dublin Bikes
+            </a>
+            <a href="/safety" class="btn btn-sm">{{ _('Safety') }}</a>
+            <a href="/faq" class="btn btn-sm">{{ _('FAQ') }}</a>
         </div>
 
         <div class="navbar-links">
             <div class="lang-wrapper">
-                <select class="lang-select" id="lang-switcher">
-                    <option value="en">EN</option>
-                    <option value="fr">FR</option>
-                    <option value="it">IT</option>
-                    <option value="zh">繁中</option>
-                    <option value="cn">简中</option>
-                    <option value="jp">JP</option>
+                <label for="lang-switcher" class="sr-only">{{ _('Language') }}</label>
+                <select class="lang-select" id="lang-switcher"
+                        onchange="window.location='/set_language/'+this.value">
+                    <option value="en" {% if session.get('lang','en') == 'en' %}selected{% endif %}>EN</option>
+                    <option value="fr" {% if session.get('lang') == 'fr' %}selected{% endif %}>FR</option>
+                    <option value="it" {% if session.get('lang') == 'it' %}selected{% endif %}>IT</option>
+                    <option value="zh" {% if session.get('lang') == 'zh' %}selected{% endif %}>繁中</option>
+                    <option value="cn" {% if session.get('lang') == 'cn' %}selected{% endif %}>简中</option>
+                    <option value="jp" {% if session.get('lang') == 'jp' %}selected{% endif %}>JP</option>
                 </select>
             </div>
             {% if session.get('user_id') %}
-                <a href="/account" class="btn btn-sm">Account</a>
-                <a href="/auth/logout" class="btn btn-sm">Log Out</a>
+                <a href="/account" class="btn btn-sm">{{ _('Account') }}</a>
+                <a href="/auth/logout" class="btn btn-sm">{{ _('Log Out') }}</a>
             {% else %}
-                <a href="/auth/login"    class="btn btn-sm">Log In</a>
+                <a href="/auth/login" class="btn btn-sm">{{ _('Log In') }}</a>
             {% endif %}
         </div>
     </nav>
@@ -71,51 +76,50 @@
                         margin-bottom: 0.75rem;
                     ">Dublin Bikes</a>
                     <p style="font-weight: 400; font-size: 0.82rem; color: #aaa; line-height: 1.6; margin: 0;">
-                        A real-time bike availability tracker and prediction tool for the Dublin Bikes scheme.
-                        Built as part of COMP30830.
+                        {{ _('A real-time bike availability tracker and prediction tool for the Dublin Bikes scheme. Built as part of COMP30830.') }}
                     </p>
                 </div>
 
                 <!-- Explore -->
                 <div style="min-width: 140px;">
-                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Explore</p>
+                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">{{ _('Explore') }}</p>
                     <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <li><a href="/" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none; transition: color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Map</a></li>
-                        <li><a href="/bike/plot" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Prediction Plot</a></li>
-                        <li><a href="/bike/number" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Prediction Number</a></li>
+                        <li><a href="/" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none; transition: color 0.15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('Map') }}</a></li>
+                        <li><a href="/bike/plot" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('Prediction Plot') }}</a></li>
+                        <li><a href="/bike/number" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('Prediction Number') }}</a></li>
                     </ul>
                 </div>
 
                 <!-- Help -->
                 <div style="min-width: 140px;">
-                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Help</p>
+                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">{{ _('Help') }}</p>
                     <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <li><a href="/faq" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">FAQ</a></li>
-                        <li><a href="/safety" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Safety Guide</a></li>
+                        <li><a href="/faq" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('FAQ') }}</a></li>
+                        <li><a href="/safety" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('Safety Guide') }}</a></li>
                     </ul>
                 </div>
 
                 <!-- Account -->
                 <div style="min-width: 140px;">
-                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Account</p>
+                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">{{ _('Account') }}</p>
                     <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
                         {% if session.get('user_id') %}
-                        <li><a href="/account" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">My Account</a></li>
-                        <li><a href="/auth/logout" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Log Out</a></li>
+                        <li><a href="/account" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('My Account') }}</a></li>
+                        <li><a href="/auth/logout" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('Log Out') }}</a></li>
                         {% else %}
-                        <li><a href="/auth/login" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Log In</a></li>
-                        <li><a href="/auth/register" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">Sign Up</a></li>
+                        <li><a href="/auth/login" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('Log In') }}</a></li>
+                        <li><a href="/auth/register" style="font-size: 0.85rem; font-weight: 600; color: #ccc; text-decoration: none;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'">{{ _('Sign Up') }}</a></li>
                         {% endif %}
                     </ul>
                 </div>
 
                 <!-- Emergency -->
                 <div style="min-width: 180px;">
-                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">Emergency</p>
+                    <p style="font-weight: 800; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--secondary); margin-bottom: 0.75rem;">{{ _('Emergency') }}</p>
                     <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem;">
-                        <li style="font-size: 0.82rem; color: #aaa; font-weight: 400;">🆘 Emergency: <strong style="color: #fff;">999 / 112</strong></li>
+                        <li style="font-size: 0.82rem; color: #aaa; font-weight: 400;">🆘 {{ _('Emergency') }}: <strong style="color: #fff;">999 / 112</strong></li>
                         <li style="font-size: 0.82rem; color: #aaa; font-weight: 400;">📞 Dublin Bikes: <strong style="color: #fff;">1800 927 000</strong></li>
-                        <li style="font-size: 0.82rem; color: #aaa; font-weight: 400;">🚔 Garda: <strong style="color: #fff;">01 666 9500</strong></li>
+                        <li style="font-size: 0.82rem; color: #aaa; font-weight: 400;">🚔 {{ _('Garda') }}: <strong style="color: #fff;">01 666 9500</strong></li>
                     </ul>
                 </div>
 
@@ -124,15 +128,17 @@
             <!-- Divider -->
             <div style="border-top: 2px solid #333; padding-top: 1.25rem; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem;">
                 <p style="font-size: 0.78rem; color: #666; margin: 0; font-weight: 400;">
-                    © 2024 Dublin Bikes App — COMP30830 Project. Data provided by
-                    <a href="https://developer.jcdecaux.com" target="_blank" rel="noopener" style="color: var(--secondary); font-weight: 600;">JCDecaux</a>
+                    © 2026 Dublin Bikes App — COMP30830 Project. {{ _('Data provided by') }}
+                    <a href="https://developer.jcdecaux.com" target="_blank" rel="noopener" style="color: var(--secondary); font-weight: 600;">JCDecaux</a>,
+                    <a href="https://photon.komoot.io/" target="_blank" rel="noopener" style="color: var(--secondary); font-weight: 600;">photon</a>,
+                    <a href="https://openweathermap.org" target="_blank" rel="noopener" style="color: var(--secondary); font-weight: 600;">OpenWeather</a>
                     &amp;
-                    <a href="https://openweathermap.org" target="_blank" rel="noopener" style="color: var(--secondary); font-weight: 600;">OpenWeather</a>.
+                    <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color: var(--secondary); font-weight: 600;">Open-Meteo</a>.
                 </p>
                 <div style="display: flex; gap: 0.75rem;">
-                    <a href="/faq" style="font-size: 0.78rem; font-weight: 700; color: #666; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">FAQ</a>
+                    <a href="/faq" style="font-size: 0.78rem; font-weight: 700; color: #666; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">{{ _('FAQ') }}</a>
                     <span style="color: #444;">·</span>
-                    <a href="/safety" style="font-size: 0.78rem; font-weight: 700; color: #666; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">Safety</a>
+                    <a href="/safety" style="font-size: 0.78rem; font-weight: 700; color: #666; text-decoration: none; text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">{{ _('Safety') }}</a>
                 </div>
             </div>
 

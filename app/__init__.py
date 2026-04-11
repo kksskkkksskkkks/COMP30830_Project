@@ -1,11 +1,23 @@
 """
 This file should ONLY contain "create_app" function
 """
-from flask import Flask
+from flask import Flask, session, request
 from flask_cors import CORS
+from flask_babel import Babel
 from config import Config
 from datetime import timedelta
 from .routes.machine_learning import ml_bp
+
+LOCALE_MAP = {'en': 'en', 'fr': 'fr', 'it': 'it', 'zh': 'zh_TW', 'cn': 'zh_CN', 'jp': 'ja'}
+
+
+def get_locale():
+    from flask import g
+    if hasattr(g, 'user') and g.user:
+        return LOCALE_MAP.get(g.user.get('preferred_language', 'en'), 'en')
+    if session.get('lang'):
+        return LOCALE_MAP.get(session['lang'], 'en')
+    return request.accept_languages.best_match(['en', 'fr', 'it', 'zh_TW', 'zh_CN', 'ja']) or 'en'
 
 
 def create_app(config_class=Config):
@@ -21,6 +33,11 @@ def create_app(config_class=Config):
 
     # cache
     cache.init_app(app, config={'CACHE_TYPE': 'SimpleCache'})
+
+    # i18n
+    Babel(app, locale_selector=get_locale)
+    from flask_babel import get_locale as babel_get_locale
+    app.jinja_env.globals['get_locale'] = babel_get_locale
 
     app.secret_key = 'your_super_secret_key'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)

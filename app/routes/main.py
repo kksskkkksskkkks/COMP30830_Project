@@ -22,6 +22,22 @@ cache = Cache()
 def home():
     return render_template("index.html", MAP_KEY=Config.MAP_KEY, MAP_ID=Config.MAP_ID)
 
+@main_bp.route('/set_language/<lang_code>')
+def set_language(lang_code):
+    allowed = {'en', 'fr', 'it', 'zh', 'cn', 'jp'}
+    if lang_code in allowed:
+        session['lang'] = lang_code
+        if session.get('user_id'):
+            from sqlalchemy import text as sql_text
+            engine = get_db()
+            with engine.begin() as conn:
+                conn.execute(
+                    sql_text("UPDATE users SET preferred_language = :lang WHERE user_id = :uid"),
+                    {"lang": lang_code, "user_id": session['user_id']}
+                )
+    return redirect(request.referrer or url_for('main.home'))
+
+
 @main_bp.route("/safety")
 def safety():
     return render_template("safety.html")
@@ -140,11 +156,38 @@ def get_available():
     return jsonify(available=available)
 
 
-# 1.3 get all availability from cache
+# 1.3 get all availability - cache → API (with DB persist) → DB fallback
 @main_bp.route("/api/bikes")
-@cache.cached(timeout=60*5)
-def get_all_stations_current(): # Originally called "bikes()"
-    return jsonify(get_bike_data())
+def get_all_stations_current():
+    from sqlalchemy import text as sql_text
+
+    cached = cache.get("api_bikes")
+    if cached is not None:
+        return jsonify(cached)
+
+    # Try external API; persist result to DB on success
+    try:
+        data = get_bike_data()
+        if data:
+            engine = get_db()
+            stations_to_db(data, engine)
+            cache.set("api_bikes", data, timeout=60 * 5)
+            return jsonify(data)
+    except Exception:
+        pass
+
+    # DB fallback: most recent availability per station
+    engine = get_db()
+    with engine.connect() as conn:
+        rows = conn.execute(sql_text(
+            "SELECT a.number, a.available_bikes, a.available_bike_stands, a.status, a.last_update "
+            "FROM availability a "
+            "INNER JOIN (SELECT number, MAX(last_update) AS max_lu FROM availability GROUP BY number) latest "
+            "ON a.number = latest.number AND a.last_update = latest.max_lu"
+        )).fetchall()
+        data = [dict(r._mapping) for r in rows]
+    cache.set("api_bikes", data, timeout=60 * 5)
+    return jsonify(data)
 
 
 # 1.4 get specific station availiability from DB
@@ -214,11 +257,38 @@ def get_weather_current():
     return jsonify(weather_current=weather_current)
 
 
-# ✅ 2.3. get weather current FROM API/chace
+# ✅ 2.3. get weather current - cache → API (with DB persist) → DB fallback
 @main_bp.route("/api/weather")
-@cache.cached(timeout=60*10)
 def weather():
-    return jsonify(get_weather())
+    from sqlalchemy import text as sql_text
+
+    cached = cache.get("api_weather")
+    if cached is not None:
+        return jsonify(cached)
+
+    # Try external API; persist result to DB on success
+    try:
+        data = get_weather()
+        if data:
+            engine = get_db()
+            try:
+                current_weather_to_db(data, engine)
+            except Exception:
+                pass  # duplicate dt key on rapid calls; don't block the response
+            cache.set("api_weather", data, timeout=60 * 10)
+            return jsonify(data)
+    except Exception:
+        pass
+
+    # DB fallback: most recent weather row
+    engine = get_db()
+    with engine.connect() as conn:
+        row = conn.execute(sql_text(
+            "SELECT * FROM current ORDER BY dt DESC LIMIT 1"
+        )).fetchone()
+        data = dict(row._mapping) if row else {}
+    cache.set("api_weather", data, timeout=60 * 10)
+    return jsonify(data)
 
 
 """
