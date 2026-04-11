@@ -31,7 +31,7 @@
         });
         document.getElementById('btn-panel-close').addEventListener('click', closePanel);
         document.getElementById('btn-locate').addEventListener('click', handleLocate);
-        document.getElementById('btn-clear').addEventListener('click', clearSearch);
+        document.getElementById('btn-search').addEventListener('click', triggerSearch);
 
         // Close IW when search box is focused
         document.getElementById('search-input').addEventListener('focus', () => {
@@ -50,6 +50,7 @@
 
         window.map.addListener('dragstart', function () {
             if (window.activeInfoWindow) window.activeInfoWindow.close();
+            clearSearchPin();
         });
 
         window.map.addListener('dragend', function () {
@@ -126,18 +127,95 @@
         panel.classList.contains('hidden') ? openPanel() : closePanel();
     }
 
-    // ── Google Places Autocomplete ─────────────────────────────────────────────
+    
+    // ── photon (OpenStreetMap) address autocomplete ──────────────────────────────────
     function initAutocomplete() {
         const input = document.getElementById('search-input');
-        const ac = new google.maps.places.Autocomplete(input, {
-            componentRestrictions: { country: 'ie' },
-            fields: ['geometry', 'name'],
+        const suggestionsEl = createSuggestionsDropdown();
+
+        const doSearch = debounce(function (q) {
+            if (q.length === 0) { hideSuggestions(suggestionsEl); return; }
+            // Query when user inputs more than 3 characters
+            if (q.length < 3) return;
+            fetch(`/api/geocode?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(results => renderSuggestions(suggestionsEl, results))
+                .catch(() => hideSuggestions(suggestionsEl));
+        }, 200);
+
+        input.addEventListener('input', () => doSearch(input.value.trim()));
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { hideSuggestions(suggestionsEl); return; }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const first = suggestionsEl.querySelector('li');
+                if (first) first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            }
         });
-        ac.addListener('place_changed', function () {
-            const place = ac.getPlace();
-            if (!place.geometry) return;
-            placeOrigin(place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#search-box-area')) hideSuggestions(suggestionsEl);
         });
+    }
+
+    function triggerSearch() {
+        const q = document.getElementById('search-input').value.trim();
+        if (q.length < 4) return;
+        const suggestionsEl = document.getElementById('search-suggestions');
+        const first = suggestionsEl && suggestionsEl.querySelector('li');
+        if (first) {
+            first.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            return;
+        }
+        fetch(`/api/geocode?q=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(results => {
+                if (results.length === 0) return;
+                const primary = results[0].name.split(',')[0];
+                document.getElementById('search-input').value = primary;
+                placeOrigin(results[0].lat, results[0].lng, primary);
+            })
+            .catch(() => {});
+    }
+
+    function createSuggestionsDropdown() {
+        const ul = document.createElement('ul');
+        ul.id = 'search-suggestions';
+        ul.className = 'search-suggestions hidden';
+        document.getElementById('search-box-area').appendChild(ul);
+        return ul;
+    }
+
+    function renderSuggestions(ul, results) {
+        ul.innerHTML = '';
+        if (results.length === 0) { ul.classList.add('hidden'); return; }
+        results.forEach(r => {
+            const li  = document.createElement('li');
+            const primary   = r.name.split(',')[0];   // first part as the short label
+            li.textContent  = r.name;
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                hideSuggestions(ul);
+                document.getElementById('search-input').value = primary;
+                placeOrigin(r.lat, r.lng, primary);
+            });
+            ul.appendChild(li);
+        });
+        ul.classList.remove('hidden');
+    }
+
+    function hideSuggestions(ul) {
+        ul.classList.add('hidden');
+        ul.innerHTML = '';
+    }
+
+    function debounce(fn, delay) {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), delay);
+        };
     }
 
     // ── Geolocation ────────────────────────────────────────────────────────────
@@ -156,27 +234,34 @@
     function placeOrigin(lat, lng, label) {
         if (window.activeInfoWindow) window.activeInfoWindow.close();
         if (searchMarker) {
-            searchMarker.setPosition({ lat, lng });
+            searchMarker.position = { lat, lng };
+            searchMarker.title    = label;
         } else {
-            searchMarker = new google.maps.Marker({
+            const pin = document.createElement('div');
+            pin.className = 'search-pin';
+            pin.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="41" height="57" viewBox="-2 -2 40 52" aria-hidden="true">
+                <path d="M18 0C8.06 0 0 8.06 0 18c0 13.5 18 30 18 30S36 31.5 36 18C36 8.06 27.94 0 18 0z" 
+                fill="#ff5e5e" stroke="#111111" stroke-width="2.5"/> <circle cx="18" cy="18" r="6" fill="#ffffff"/></svg>`;
+            searchMarker = new google.maps.marker.AdvancedMarkerElement({
                 position: { lat, lng },
                 map: window.map,
                 title: label,
-                icon: {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 9,
-                    fillColor: '#444',
-                    fillOpacity: 1,
-                    strokeColor: '#fff',
-                    strokeWeight: 2,
-                },
-                zIndex: 999,
+                content: pin,
+                zIndex: 9999,
             });
         }
         window.map.panTo({ lat, lng });
-        document.getElementById('btn-clear').style.display = 'inline-flex';
         runNearbySearch(lat, lng);
     }
+
+    // ── Remove the search pin ─────────────────────────────────────────────────
+    function clearSearchPin() {
+        if (searchMarker) {
+            searchMarker.map = null;
+            searchMarker = null;
+        }
+    }
+    window.clearSearchPin = clearSearchPin;
 
     // ── Core search: filter open, sort by distance, page ──────────────────────
     function runNearbySearch(originLat, originLng) {
@@ -238,8 +323,8 @@
                     </div>
                     <div class="sc-row">
                         <span class="sc-distance">${s.distance.toFixed(2)} km away</span>
-                        <span class="sc-stat">🚲 ${bikes}</span>
-                        <span class="sc-stat">🅿️ ${stands}</span>
+                        <span class="sc-stat"><img src="/static/bike_icon.svg" class="sc-icon" alt="Bike"> ${bikes}</span>
+                        <span class="sc-stat"><img src="/static/parking_icon.png" class="sc-icon" alt="Parking"> ${stands}</span>
                     </div>
                 `;
 
@@ -252,6 +337,7 @@
                 }
 
                 li.addEventListener('click', () => {
+                    clearSearchPin();
                     window.map.panTo({ lat: s.lat, lng: s.lng });
                     window.map.setZoom(16);
                     setActive(s.number);
@@ -293,7 +379,7 @@
         });
     }
 
-    // ── Card ↔ marker highlight ────────────────────────────────────────────────
+    // ── Card marker highlight ────────────────────────────────────────────────
     function setActive(number) {
         clearActive();
         activeNumber = number;
@@ -328,19 +414,5 @@
     // Expose active state controls to index.js
     window.nearbySetActive   = setActive;
     window.nearbyClearActive = clearActive;
-
-    // ── Clear search — reset to Dublin city centre ─────────────────────────────
-    function clearSearch() {
-        if (window.activeInfoWindow) window.activeInfoWindow.close();
-        if (searchMarker) { searchMarker.setMap(null); searchMarker = null; }
-
-        Object.values(window.stationMarkers || {}).forEach(m => m.content.style.display = '');
-
-        document.getElementById('search-input').value = '';
-        document.getElementById('btn-clear').style.display = 'none';
-        clearActive();
-
-        runNearbySearch(DUBLIN_CENTER.lat, DUBLIN_CENTER.lng);
-    }
 
 })();

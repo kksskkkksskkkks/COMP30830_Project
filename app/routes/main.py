@@ -2,7 +2,7 @@
 This file includes business logic related functions (e.g. bike, weather, google map)
 """
 from config import Config
-from flask import Blueprint, g, jsonify, render_template, session, redirect, url_for
+from flask import Blueprint, g, jsonify, render_template, session, redirect, url_for, request
 import requests
 from datetime import datetime, timezone
 from flask_caching import Cache
@@ -54,6 +54,32 @@ def account():
         ).fetchall()
         favorites = [dict(r._mapping) for r in rows]
     return render_template('account.html', user=user, favorites=favorites)
+
+
+@main_bp.route("/api/geocode")
+def geocode():
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify([])
+    try:
+        resp = requests.get(
+            "https://photon.komoot.io/api/",
+            params={"q": q, "limit": 5, "bbox": "-6.32,53.32,-6.14,53.40"},  # (lng_min,lat_min,lng_max,lat_max) Limit search result to Dublin only
+            headers={"User-Agent": "DublinBikesApp/1.0"},
+            timeout=5,
+        )
+        results = []
+        for f in resp.json().get("features", []):
+            props  = f.get("properties", {})
+            coords = f["geometry"]["coordinates"]   # [lng, lat]
+            parts  = [props.get("name"), props.get("street"), props.get("district") or props.get("suburb")]
+            name   = ", ".join(p for p in parts if p)
+            if not name:
+                continue
+            results.append({"name": name, "lat": coords[1], "lng": coords[0]})
+        return jsonify(results)
+    except Exception:
+        return jsonify([])
 
 
 @main_bp.route("/bike/plot")

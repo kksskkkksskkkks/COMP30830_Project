@@ -123,22 +123,12 @@
      ═══════════════════════════════════════════════════════ -->
 <div id="app-layout" style="height: 620px;">
 
-    <div id="results-panel" class="hidden" role="region" aria-label="Nearby stations">
+    <div id="results-panel" role="region" aria-label="Nearby stations">
         <div id="panel-header">
             <span id="panel-title">Nearby Stations</span>
             <button id="btn-panel-close" aria-label="Close station list">&#x2715;</button>
         </div>
-        <ul id="station-list" aria-live="polite" aria-label="Station list"></ul>
-    </div>
-
-    <div id="map" role="application" aria-label="Dublin bike stations map"></div>
-
-    <div id="map-overlay">
-        <button id="btn-panel-toggle" aria-label="Open station list" aria-expanded="false" aria-controls="results-panel">
-            <span aria-hidden="true" id="toggle-icon">&#8250;</span>
-        </button>
-
-        <div id="search-float">
+        <div id="search-box-area">
             <div id="search-group" role="search" aria-label="Search address or place">
                 <label for="search-input" class="sr-only">Search address or place</label>
                 <input id="search-input" type="text" placeholder="Search address or place…" autocomplete="off">
@@ -147,12 +137,25 @@
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                     </svg>
                 </button>
+                <button id="btn-search" class="btn-icon" aria-label="Search" title="Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </button>
                 <button id="btn-clear" class="btn-icon btn-icon-muted" aria-label="Clear search" title="Clear search" style="display:none;">
                     &#x2715;
                 </button>
             </div>
         </div>
+        <ul id="station-list" aria-live="polite" aria-label="Station list"></ul>
+    </div>
 
+    <div id="map" role="application" aria-label="Dublin bike stations map"></div>
+
+    <div id="map-overlay">
+        <button id="btn-panel-toggle" class="panel-open" aria-label="Close station list" aria-expanded="true" aria-controls="results-panel">
+            <span aria-hidden="true" id="toggle-icon">&#8250;</span>
+        </button>
         <div id="weather" aria-live="polite" aria-label="Current weather"></div>
     </div>
 
