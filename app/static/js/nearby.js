@@ -6,16 +6,16 @@
     // ── State ──────────────────────────────────────────────────────────────────
     let allStations    = [];
     let liveData       = {};
-    let searchMarker   = null;
     let currentResults = [];   // all open stations sorted by distance
-    let displayLimit   = 20;
-    let activeNumber   = null;
+    let activeNumber  = null;
+    let walkCircle    = null;  // 10-min walk radius circle
+    let centerMarker  = null;  // centre point of the walk circle
+
+    const WALK_RADIUS_M = 800; // ~10 min walk
 
     // Favourites — shared with index.js via window
     window.userFavorites = new Set();
 
-    const DUBLIN_CENTER = { lat: 53.3498, lng: -6.2603 };
-    const PAGE_SIZE     = 20;
 
     // ── Hook into initMap without modifying index.js ───────────────────────────
     const _origInitMap = window.initMap;
@@ -43,19 +43,12 @@
             if (e.key === 'Escape' && window.activeInfoWindow) window.activeInfoWindow.close();
         });
 
-        window.map.addListener('click', function (e) {
+        window.map.addListener('click', function () {
             if (window.activeInfoWindow) window.activeInfoWindow.close();
-            placeOrigin(e.latLng.lat(), e.latLng.lng(), 'Pinned Location');
         });
 
         window.map.addListener('dragstart', function () {
             if (window.activeInfoWindow) window.activeInfoWindow.close();
-            clearSearchPin();
-        });
-
-        window.map.addListener('dragend', function () {
-            const c = window.map.getCenter();
-            runNearbySearch(c.lat(), c.lng());
         });
 
         initAutocomplete();
@@ -67,7 +60,6 @@
             loadFavorites(),
         ]).then(() => {
             addMarkers(allStations);   // markers created after live data is ready — badges show accurate counts
-            runNearbySearch(DUBLIN_CENTER.lat, DUBLIN_CENTER.lng);
         }).catch(err => console.error('[nearby] data fetch failed:', err));
     }
 
@@ -80,7 +72,7 @@
             .catch(() => {});
     }
 
-    function toggleFavorite(stationNumber, btn) {
+    function toggleFavorite(stationNumber) {
         const isFav  = window.userFavorites.has(stationNumber);
         const method = isFav ? 'DELETE' : 'POST';
         const url    = isFav ? `/auth/favorites/${stationNumber}` : '/auth/favorites';
@@ -109,7 +101,7 @@
         document.getElementById('results-panel').classList.remove('hidden');
         const btn = document.getElementById('btn-panel-toggle');
         btn.classList.add('panel-open');
-        btn.setAttribute('aria-label', 'Close station list');
+        btn.setAttribute('aria-label', 'Close station search');
         btn.setAttribute('aria-expanded', 'true');
     }
 
@@ -118,8 +110,12 @@
         document.getElementById('results-panel').classList.add('hidden');
         const btn = document.getElementById('btn-panel-toggle');
         btn.classList.remove('panel-open');
-        btn.setAttribute('aria-label', 'Open station list');
+        btn.setAttribute('aria-label', 'Open station search');
         btn.setAttribute('aria-expanded', 'false');
+
+        // Remove walk radius circle and centre point
+        if (walkCircle)   { walkCircle.setMap(null);   walkCircle   = null; }
+        if (centerMarker) { centerMarker.map = null;   centerMarker = null; }
     }
 
     function togglePanel() {
@@ -174,7 +170,7 @@
                 if (results.length === 0) return;
                 const primary = results[0].name.split(',')[0];
                 document.getElementById('search-input').value = primary;
-                placeOrigin(results[0].lat, results[0].lng, primary);
+                placeOrigin(results[0].lat, results[0].lng);
             })
             .catch(() => {});
     }
@@ -198,7 +194,7 @@
                 e.preventDefault();
                 hideSuggestions(ul);
                 document.getElementById('search-input').value = primary;
-                placeOrigin(r.lat, r.lng, primary);
+                placeOrigin(r.lat, r.lng);
             });
             ul.appendChild(li);
         });
@@ -225,58 +221,61 @@
             return;
         }
         navigator.geolocation.getCurrentPosition(
-            pos => placeOrigin(pos.coords.latitude, pos.coords.longitude, 'My Location'),
+            pos => placeOrigin(pos.coords.latitude, pos.coords.longitude),
             err => alert('Could not get your location: ' + err.message)
         );
     }
 
-    // ── Place origin pin ───────────────────────────────────────────────────────
-    function placeOrigin(lat, lng, label) {
+    // ── Place origin ──────────────────────────────────────────────────────────
+    function placeOrigin(lat, lng) {
         if (window.activeInfoWindow) window.activeInfoWindow.close();
-        if (searchMarker) {
-            searchMarker.position = { lat, lng };
-            searchMarker.title    = label;
+
+        // A circle showing 10 min walking distance
+        if (walkCircle) {
+            walkCircle.setCenter({ lat, lng });
+            centerMarker.position = { lat, lng };
         } else {
-            const pin = document.createElement('div');
-            pin.className = 'search-pin';
-            pin.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="41" height="57" viewBox="-2 -2 40 52" aria-hidden="true">
-                <path d="M18 0C8.06 0 0 8.06 0 18c0 13.5 18 30 18 30S36 31.5 36 18C36 8.06 27.94 0 18 0z" 
-                fill="#ff5e5e" stroke="#111111" stroke-width="2.5"/> <circle cx="18" cy="18" r="6" fill="#ffffff"/></svg>`;
-            searchMarker = new google.maps.marker.AdvancedMarkerElement({
-                position: { lat, lng },
+            const accent = getComputedStyle(document.documentElement)
+                .getPropertyValue('--accent').trim() || '#ffbc00';
+            walkCircle = new google.maps.Circle({
                 map: window.map,
-                title: label,
-                content: pin,
-                zIndex: 9999,
+                center: { lat, lng },
+                radius: WALK_RADIUS_M,
+                fillColor: accent,
+                fillOpacity: 0.1,
+                strokeColor: accent,
+                strokeOpacity: 0.5,
+                strokeWeight: 2,
+                clickable: false,
+                zIndex: 0,
+            });
+
+            const dot = document.createElement('div');
+            dot.className = 'origin-dot';
+            centerMarker = new google.maps.marker.AdvancedMarkerElement({
+                map: window.map,
+                position: { lat, lng },
+                content: dot,
+                zIndex: 1,
             });
         }
+
         window.map.panTo({ lat, lng });
         runNearbySearch(lat, lng);
     }
 
-    // ── Remove the search pin ─────────────────────────────────────────────────
-    function clearSearchPin() {
-        if (searchMarker) {
-            searchMarker.map = null;
-            searchMarker = null;
-        }
-    }
-    window.clearSearchPin = clearSearchPin;
-
-    // ── Core search: filter open, sort by distance, page ──────────────────────
+    // ── Core search: filter open, sort by distance ────────────────────────────
     function runNearbySearch(originLat, originLng) {
-        displayLimit   = PAGE_SIZE;
         currentResults = allStations
             .map(s => ({
                 ...s,
                 live: liveData[s.number] || {},
                 distance: haversineKm(originLat, originLng, s.lat, s.lng),
             }))
-            .filter(s => (s.live.status || '').toUpperCase() === 'OPEN')
             .sort((a, b) => a.distance - b.distance);
 
-        renderPanel(currentResults.slice(0, displayLimit));
-        updateMapOverlay(currentResults.slice(0, displayLimit));
+        renderPanel(currentResults);
+        updateMapOverlay(currentResults);
     }
 
     // ── Haversine distance (km) ────────────────────────────────────────────────
@@ -299,7 +298,7 @@
         if (stations.length === 0) {
             const li = document.createElement('li');
             li.className = 'no-results';
-            li.textContent = 'No open stations found nearby.';
+            li.textContent = 'No stations found.';
             list.appendChild(li);
         } else {
             stations.forEach(s => {
@@ -337,7 +336,6 @@
                 }
 
                 li.addEventListener('click', () => {
-                    clearSearchPin();
                     window.map.panTo({ lat: s.lat, lng: s.lng });
                     window.map.setZoom(16);
                     setActive(s.number);
@@ -350,21 +348,6 @@
 
                 list.appendChild(li);
             });
-
-            // "Show more" only if more results exist
-            if (displayLimit < currentResults.length) {
-                const li = document.createElement('li');
-                li.className = 'show-more-item';
-                li.innerHTML = '<button class="btn-show-more">Show more</button>';
-                li.querySelector('button').addEventListener('click', () => {
-                    if (window.activeInfoWindow) window.activeInfoWindow.close();
-                    displayLimit += PAGE_SIZE;
-                    const next = currentResults.slice(0, displayLimit);
-                    renderPanel(next);
-                    updateMapOverlay(next);
-                });
-                list.appendChild(li);
-            }
         }
 
         openPanel();
@@ -411,8 +394,7 @@
         activeNumber = null;
     }
 
-    // Expose active state controls to index.js
-    window.nearbySetActive   = setActive;
+    // Expose clearActive for index.js
     window.nearbyClearActive = clearActive;
 
 })();

@@ -33,11 +33,10 @@ function initMap() {
     // Expose stations promise — nearby.js uses it to avoid a duplicate fetch
     window.stationsReady = getStations();
 
-
-    getStations().then(stations => {
-        if (stations) {
-            addMarkers(stations);
-        }
+    // Update pin sizes when user zooms
+    map.addListener('zoom_changed', () => {
+        const mode = getBadgeMode(map.getZoom());
+        Object.values(window.stationMarkers || {}).forEach(m => applyPinMode(m.content, mode));
     });
 
     getWeather();
@@ -58,40 +57,40 @@ function addMarkers(stations) {
     window.stationMarkers = window.stationMarkers || {};
 
     for (const station of stations) {
-        const live   = (window.nearbyLiveData || {})[station.number] || {};
-        const bikes  = live.available_bikes       !== undefined ? live.available_bikes       : '–';
-        const stands = live.available_bike_stands !== undefined ? live.available_bike_stands : '–';
+        // Remove any existing markers for this station before recreating
+        if (window.stationMarkers[station.number]) {
+            window.stationMarkers[station.number].map = null;
+        }
 
-        const badge = document.createElement('div');
-        badge.className = 'station-badge';
-        badge.innerHTML = `<img src="/static/bike_icon.svg" class="badge-icon" alt="bikes"><span>${bikes}</span><span class="badge-divider">|</span><img src="/static/parking_icon.png" class="badge-icon" alt="stands"><span>${stands}</span>`;
+        const live   = (window.nearbyLiveData || {})[station.number] || {};
+        const status = live.status || '';
+        const bikes  = live.available_bikes       !== undefined ? live.available_bikes       : null;
+        const stands = live.available_bike_stands !== undefined ? live.available_bike_stands : null;
+
+        const pinEl = document.createElement('div');
+        pinEl.className = 'station-pin';
+        pinEl.dataset.bikes  = bikes  !== null ? bikes  : '';
+        pinEl.dataset.stands = stands !== null ? stands : '';
+        pinEl.dataset.status = status;
+        pinEl.dataset.avail  = getPinAvail(status, bikes, stands);
+        pinEl.innerHTML = buildPinHTML(bikes);
+        applyPinMode(pinEl, getBadgeMode(map.getZoom()));
 
         const marker = new google.maps.marker.AdvancedMarkerElement({
             position: { lat: station.lat, lng: station.lng },
             map: map,
             title: station.name,
-            content: badge,
+            content: pinEl,
         });
 
         window.stationMarkers[station.number] = marker;
 
         // Click — open info window with 24h prediction charts
         marker.addListener("click", () => {
-            if (window.clearSearchPin) window.clearSearchPin();
             const sid    = station.number;
             const ld     = (window.nearbyLiveData || {})[sid] || {};
             const bikes2  = ld.available_bikes       !== undefined ? ld.available_bikes       : 'N/A';
             const stands2 = ld.available_bike_stands !== undefined ? ld.available_bike_stands : 'N/A';
-
-            if (window.nearbySetActive) window.nearbySetActive(sid);
-
-            const isFav = window.IS_LOGGED_IN && window.userFavorites && window.userFavorites.has(station.number);
-            const favBtn = window.IS_LOGGED_IN
-                ? `<button class="btn-fav${isFav ? ' fav--active' : ''}"
-                          data-fav-number="${station.number}"
-                          onclick="window.toggleFavorite(${station.number}, this)"
-                          aria-label="Toggle favourite">&#9829;</button>`
-                : '';
 
             const content = `
                 <div style="min-width: 280px;">
@@ -156,11 +155,49 @@ function addMarkers(stations) {
             });
         });
 
-        // Hover — open info window (same as click)
-        marker.addListener("mouseover", () => {
-            google.maps.event.trigger(marker, 'click');
+        // Hover — move to the top
+        pinEl.addEventListener("mouseenter", () => {
+            marker.zIndex = 9999;
+        });
+
+        pinEl.addEventListener("mouseleave", () => {
+            if (!pinEl.classList.contains('station-badge--active')) {
+                marker.zIndex = null;
+            }
         });
     }
+}
+
+
+// ── Pin marker helpers ────────────────────────────────────────────────────────
+
+function getPinAvail(status, bikes, stands) {
+    if (!status || status.toUpperCase() !== 'OPEN') return 'closed';
+    if (bikes === null) return 'unknown';
+    if (stands === 0)   return 'full';   // no empty docks
+    if (bikes === 0)    return 'empty';  // no bikes
+    return 'good';
+}
+
+function buildPinHTML(bikes) {
+    const label = bikes !== null ? bikes : '–';
+    return `<svg class="pin-svg" viewBox="0 0 40 52" xmlns="http://www.w3.org/2000/svg"><path d="M20 2 C10 2 2 10 2 20 C2 32 20 50 20 50 C20 50 38 32 38 20 C38 10 30 2 20 2 Z"/></svg><span class="pin-label">${label}</span>`;
+}
+
+function getBadgeMode(zoom) {
+    if (zoom >= 15) return 'full';
+    if (zoom >= 13) return 'compact';
+    return 'dot';
+}
+
+function applyPinMode(pinEl, mode) {
+    pinEl.classList.remove('pin--full', 'pin--compact', 'pin--dot');
+    pinEl.classList.add(`pin--${mode}`);
+    const isDot = mode === 'dot';
+    const svg   = pinEl.querySelector('.pin-svg');
+    const label = pinEl.querySelector('.pin-label');
+    if (svg)   svg.style.display   = isDot ? 'none' : '';
+    if (label) label.style.display = isDot ? 'none' : '';
 }
 
 // Draw prediction chart from ML backend
@@ -218,7 +255,7 @@ function getWeather() {
 function displayWeather(data) {
     console.log("Full data received:", data);
 
-    if (!data || !data.current) {
+    if (!data || !data.main) {
         console.error("error data structure or fail fetch data");
         document.getElementById("weather").innerHTML = "Weather data unavailable";
         return;
