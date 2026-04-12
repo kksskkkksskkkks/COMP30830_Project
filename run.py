@@ -2,9 +2,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app import create_app
-from config import DevelopmentConfig
+from config import DevelopmentConfig,ProductionConfig
 
-app = create_app(DevelopmentConfig)
+app = create_app(ProductionConfig)
 
 if __name__ == "__main__":
     

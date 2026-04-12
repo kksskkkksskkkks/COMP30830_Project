@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,50 +11,35 @@ DB = os.getenv("DB_NAME")
 URI = os.getenv("DB_URI")
 
 connection_string = "mysql+pymysql://{}:{}@{}:{}/{}".format(USER, PASSWORD, URI, PORT, DB)
+engine = create_engine(connection_string, echo=True)
 
-engine = create_engine(connection_string, echo = True)
+with engine.connect() as conn:
+    with conn.begin():
+        sql_station = '''
+        CREATE TABLE IF NOT EXISTS station (
+            `number` INTEGER NOT NULL,
+            contract_name VARCHAR(128),
+            `name` VARCHAR(128),
+            address VARCHAR(128),
+            bike_stands INTEGER,
+            lat FLOAT,
+            lng FLOAT,
+            banking BOOLEAN,
+            bonus BOOLEAN,
+            PRIMARY KEY (`number`)
+        ) ENGINE=InnoDB;
+        '''
+        conn.execute(text(sql_station))
 
-for res in engine.execute("SHOW VARIABLES;"):
-    print(res)
-
-# Create a station table
-
-sql = '''
-CREATE TABLE IF NOT EXISTS station (
-`number` Integer not null,
-contract_name VARCHAR(128),
-`name` VARCHAR(128),
-address VARCHAR(128),
-bike_stands integer,
-lat FLOAT,
-lng FLOAT,
-banking boolean,
-bonus boolean
+    sql_availability = """
+    CREATE TABLE IF NOT EXISTS availability (
+        `number` INTEGER NOT NULL,
+        available_bike_stands INTEGER,
+        available_bikes INTEGER,
+        status VARCHAR(128),
+        last_update BIGINT NOT NULL,
+        PRIMARY KEY (`number`, last_update)
     );
-'''
-
-# Execute the query
-res = engine.execute(sql)
-
-# Use the engine to execute the DESCRIBE command to inspect the table schema
-tab_structure = engine.execute("SHOW COLUMNS FROM station;")
-
-# Fetch and print the result to see the columns of the table
-columns = tab_structure.fetchall()
-print(columns)
-
-# CREATE AVAILABILITY TABLE
-sql = """
-CREATE TABLE IF NOT EXISTS availability (
-`number` integer not null,
-available_bike_stands integer,
-available_bikes integer,
-status varchar(128),
-last_update bigint not null
-);
-"""
-
-engine.execute(sql)
-
-
-# ALTER TABLE station ADD PRIMARY KEY (`number`);
+    """
+    conn.execute(text(sql_availability))
+    print("Station and Availability create table successfully")
