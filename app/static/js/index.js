@@ -107,6 +107,18 @@ function addMarkers(stations) {
                     <div id="stand_pred_${sid}" class="iw-chart" style="margin-top: 10px; background: #fdfaf6; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #666;">
                         Loading stand predictions...
                     </div>
+                    ${window.IS_LOGGED_IN
+                        ? `<div style="margin-top: 10px; text-align: center;">
+                               <a href="/bike/plot?station_id=${sid}" target="_blank"
+                                  class="btn btn-primary"
+                                  style="font-size: 0.68rem; padding: 0.3rem 0.75rem; display: inline-block;">
+                                   View Next 24H Estimation ↗
+                               </a>
+                           </div>`
+                        : `<div style="margin-top: 10px; padding-top: 8px; border-top: 3px solid #111; font-size: 0.78rem; font-weight: 600; text-align: center; color: #555;">
+                               <a href="/auth/login" style="color: var(--primary); font-weight: 700;">Log in</a> to see 24h availability estimation
+                           </div>`
+                    }
                 </div>
             `;
 
@@ -126,7 +138,12 @@ function addMarkers(stations) {
                     .then(r => r.json())
                     .then(res => {
                         if (res.status === "success" && res.chart_data) {
-                            drawPredictionChart(res.chart_data, `bike_pred_${sid}`, "Predicted Available Bikes", "#4285F4");
+                            const slicedBike = {
+                                ...res.chart_data,
+                                labels: res.chart_data.labels.slice(0, 5),
+                                data_available_bikes: (res.chart_data.data_available_bikes || []).slice(0, 5)
+                            };
+                            drawPredictionChart(slicedBike, `bike_pred_${sid}`, "Estimated Available Bikes", "#4285F4");
                         } else {
                             document.getElementById(`bike_pred_${sid}`).innerText = "Bike data unavailable";
                             console.warn("Bike ML error:", res);
@@ -142,7 +159,12 @@ function addMarkers(stations) {
                     .then(r => r.json())
                     .then(res => {
                         if (res.status === "success" && res.chart_data) {
-                            drawPredictionChart(res.chart_data, `stand_pred_${sid}`, "Predicted Empty Stands", "#EA4335");
+                            const slicedStand = {
+                                ...res.chart_data,
+                                labels: res.chart_data.labels.slice(0, 5),
+                                data_empty_stands: (res.chart_data.data_empty_stands || []).slice(0, 5)
+                            };
+                            drawPredictionChart(slicedStand, `stand_pred_${sid}`, "Estimated Available Stands", "#EA4335");
                         } else {
                             document.getElementById(`stand_pred_${sid}`).innerText = "Stand data unavailable";
                             console.warn("Stand ML error:", res);
@@ -223,8 +245,9 @@ function drawPredictionChart(chartData, containerId, label, color) {
 
     const options = {
         title: label,
+        titleTextStyle: { fontSize: 13, bold: true },
         hAxis: { format: 'HH:mm', gridlines: { count: 3 }, textStyle: { fontSize: 10 } },
-        vAxis: { minValue: 0, textStyle: { fontSize: 10 } },
+        vAxis: { minValue: 0, textStyle: { fontSize: 12 } },
         colors: [color],
         legend: 'none',
         width: 280,

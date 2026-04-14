@@ -737,7 +737,7 @@ body.page-map .page-content {
 
 .iw-title {
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-color);
@@ -759,7 +759,7 @@ body.page-map .page-content {
 }
 
 .iw-stats {
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--text-color);
