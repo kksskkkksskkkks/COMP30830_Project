@@ -5,99 +5,101 @@
 {% block head %}
     <style>
         .center-wrapper {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            background-color: var(--bg-color);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: calc(100vh - 72px);
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            padding: 2rem 1.5rem;
         }
+
         .prediction-box {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            background: #fff;
+            border: var(--border-thick);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-solid);
+            padding: 2rem;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
         }
+
         .prediction-box h2 {
             text-align: center;
-            color: #2c3e50;
-            margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            font-size: 14px;
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+            font-size: 0.85rem;
         }
+
         .form-group input[type="date"],
         .form-group input[type="time"],
         .form-group input[type="number"] {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-            font-family: inherit;
-            margin-bottom: 5px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.55rem 0.8rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-md);
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
         }
+
+        .form-group input:focus {
+            box-shadow: 0 0 0 3px var(--primary);
+            background: #fff;
+        }
+
         .button-group {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
         }
-        .button-group button {
+
+        .button-group .btn {
             flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            color: white;
-            transition: background-color 0.3s;
+            text-align: center;
         }
-        .btn-bike {
-            background-color: #3498db;
+
+        .btn-stand-style {
+            background-color: var(--secondary);
         }
-        .btn-bike:hover {
-            background-color: #2980b9;
-        }
-        .btn-stand {
-            background-color: #2ecc71;
-        }
-        .btn-stand:hover {
-            background-color: #27ae60;
-        }
+
         .result-box {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            background-color: #ecf0f1;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-md);
+            background-color: var(--bg-color);
+            box-shadow: var(--shadow-solid-sm);
             display: none;
-            word-wrap: break-word;
         }
+
         .result-title {
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #2c3e50;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
+
         .result-content {
-            font-size: 18px;
-            color: #e74c3c;
-            font-weight: bold;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
         }
+
         .error {
-            color: #c0392b;
-            font-size: 14px;
+            color: var(--primary);
+            font-size: 0.85rem;
         }
     </style>
 {% endblock %}
@@ -106,7 +108,7 @@
 <div class="center-wrapper">
 
 <div class="prediction-box">
-    <h2>🚲 Station Prediction System</h2>
+    <h2>Station Prediction System</h2>
 
     <div class="form-group">
         <label for="date">Prediction Date:</label>
@@ -115,7 +117,7 @@
 
     <div class="form-group">
         <label for="time">Prediction Time:</label>
-        <input type="time" id="time" lang="en"  required>
+        <input type="time" id="time" lang="en" required>
     </div>
 
     <div class="form-group">
@@ -124,8 +126,8 @@
     </div>
 
     <div class="button-group">
-        <button class="btn-bike" onclick="makePrediction('bike')">Predict Available Bikes</button>
-        <button class="btn-stand" onclick="makePrediction('stand')">Predict Empty Stands</button>
+        <button class="btn btn-primary" onclick="makePrediction('bike')">Predict Bikes</button>
+        <button class="btn btn-stand-style" onclick="makePrediction('stand')">Predict Stands</button>
     </div>
 
     <div class="result-box" id="resultBox">
@@ -142,8 +144,8 @@
     document.getElementById('date').valueAsDate = new Date();
 
     const now = new Date();
-    const currentTime = String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
-    document.getElementById('time').value = currentTime;
+    document.getElementById('time').value =
+        String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
 
     // Core prediction function
     async function makePrediction(type) {
@@ -167,27 +169,13 @@
         // Show loading state
         resultBox.style.display = 'block';
         resultTitle.innerText = type === 'bike' ? "Predicting available bikes..." : "Predicting empty stands...";
-        resultContent.innerHTML = `<span style="color: #7f8c8d; font-size: 14px;">Sending request...</span>`;
+        resultContent.innerHTML = `<span style="font-size: 0.85rem; font-weight: 600; color: #888;">Sending request...</span>`;
 
-        const baseUrl = '';
         const endpoint = type === 'bike' ? '/predict/bike' : '/predict/stand';
-
-        const params = new URLSearchParams({
-            date: date,
-            time: time,
-            station_id: station_id
-        });
-
-        const url = `${baseUrl}${endpoint}?${params.toString()}`;
+        const params = new URLSearchParams({ date, time, station_id });
 
         try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
+            const response = await fetch(`${endpoint}?${params}`, { headers: { 'Accept': 'application/json' } });
             const data = await response.json();
 
             if (response.ok) {
@@ -200,7 +188,7 @@
             } else {
                 // Backend returned 400, 404, or 500 error
                 resultTitle.innerText = "Prediction Failed";
-                resultContent.innerHTML = `<span class="error">${data.error || 'Unknown Error'} <br> ${data.details || ''}</span>`;
+                resultContent.innerHTML = `<span class="error">${data.error || 'Unknown Error'}<br>${data.details || ''}</span>`;
             }
         } catch (error) {
             // Network error or backend not running

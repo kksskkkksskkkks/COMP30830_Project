@@ -5,33 +5,105 @@
 {% block head %}
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
     <style>
-        .plot-wrapper { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 40px 20px 80px 20px; min-height: calc(100vh - 72px); box-sizing: border-box;}
-        .plot-container { max-width: 1000px; margin: 0 auto 80px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        .plot-container h2 { text-align: center; color: #1a202c; margin-bottom: 25px; }
-
-        .control-panel { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        .input-group { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #4a5568; }
-        .input-group input { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 6px; outline: none; }
-        .btn-predict { padding: 9px 25px; background-color: #2b6cb0; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        .btn-predict:hover { background-color: #2c5282; }
-
-        .tab-container { display: flex; justify-content: center; margin-bottom: 20px; }
-        .tab-btn {
-            padding: 10px 25px;
-            border: 1px solid #cbd5e0;
-            background: white;
-            cursor: pointer;
-            font-weight: 600;
-            color: #718096;
-            transition: all 0.3s;
+        .plot-wrapper {
+            background-color: var(--bg-color);
+            padding: 2.5rem 1.5rem 4rem;
+            min-height: calc(100vh - 72px);
         }
-        .tab-btn:first-child { border-radius: 8px 0 0 8px; }
-        .tab-btn:last-child { border-radius: 0 8px 8px 0; }
-        .tab-btn.active { background-color: #4a5568; color: white; border-color: #4a5568; z-index: 1; }
-        .tab-btn:hover:not(.active) { background-color: #edf2f7; }
+
+        .plot-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 2rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-solid);
+        }
+
+        .plot-container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            background: var(--bg-color);
+            padding: 1.2rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-md);
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .input-group input {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.45rem 0.75rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-md);
+            outline: none;
+            background: #fff;
+            color: var(--text-color);
+        }
+
+        .input-group input:focus {
+            box-shadow: 0 0 0 3px var(--primary);
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .tab-btn {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.55rem 1.4rem;
+            border: var(--border-thick);
+            border-right: none;
+            background: #fff;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: background 0.15s;
+        }
+
+        .tab-btn:first-child { border-radius: var(--radius-md) 0 0 var(--radius-md); }
+        .tab-btn:last-child  { border-radius: 0 var(--radius-md) var(--radius-md) 0; border-right: var(--border-thick); }
+
+        .tab-btn.active {
+            background-color: var(--secondary);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background-color: var(--bg-color);
+        }
 
         #main-chart { width: 100%; height: 500px; }
-        #error-msg { color: #e53e3e; text-align: center; margin-bottom: 10px; font-weight: 600; min-height: 20px; }
+
+        #error-msg {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 0.6rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-height: 1.2rem;
+        }
     </style>
 {% endblock %}
 
@@ -39,7 +111,7 @@
 <div class="plot-wrapper">
 
 <div class="plot-container">
-    <h2>🚲 24H Dual-Model Comprehensive Prediction</h2>
+    <h2>24H Dual-Model Comprehensive Prediction</h2>
 
     <div class="control-panel">
         <div class="input-group">
@@ -52,9 +124,9 @@
         </div>
         <div class="input-group">
             <label>Station ID:</label>
-            <input type="number" id="station-input" value="1" min="1" max="117" style="width: 70px;">
+            <input type="number" id="station-input" value="{{ station_id }}" min="1" max="117" style="width: 70px;">
         </div>
-        <button class="btn-predict" onclick="fetchData()">Update Prediction</button>
+        <button class="btn btn-primary" onclick="fetchData()">Update Prediction</button>
     </div>
 
     <div class="tab-container">
@@ -134,15 +206,13 @@
     function updateChart() {
         if (!cachedData.bike) return;
 
-        let series = [];
-
         const bikeSeries = {
             name: 'Available Bikes (Model B)',
             type: 'line',
             smooth: true,
             data: cachedData.bike,
-            itemStyle: { color: '#38a169' },
-            areaStyle: { opacity: 0.1, color: '#38a169' },
+            itemStyle: { color: '#00d2d3' },
+            areaStyle: { opacity: 0.12, color: '#00d2d3' },
             lineStyle: { width: 3 }
         };
 
@@ -151,24 +221,22 @@
             type: 'line',
             smooth: true,
             data: cachedData.stand,
-            itemStyle: { color: '#e53e3e' },
-            areaStyle: { opacity: 0.05, color: '#e53e3e' },
+            itemStyle: { color: '#ff5e5e' },
+            areaStyle: { opacity: 0.08, color: '#ff5e5e' },
             lineStyle: { width: 3, type: 'dashed' }
         };
 
-        if (activeMode === 'all') {
-            series = [bikeSeries, standSeries];
-        } else if (activeMode === 'bike') {
-            series = [bikeSeries];
-        } else {
-            series = [standSeries];
-        }
+        let series = [];
+        if (activeMode === 'all')        series = [bikeSeries, standSeries];
+        else if (activeMode === 'bike')  series = [bikeSeries];
+        else                             series = [standSeries];
 
         const option = {
             title: {
                 text: "Next 24H Station Status Comparison",
                 subtext: `Total Capacity: ${cachedData.capacity}`,
-                left: 'center'
+                left: 'center',
+                textStyle: { fontFamily: 'Poppins', fontWeight: 800 }
             },
             tooltip: { trigger: 'axis' },
             legend: { bottom: '5%', data: ['Available Bikes (Model B)', 'Empty Stands (Model A)'] },
