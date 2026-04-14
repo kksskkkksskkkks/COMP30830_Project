@@ -39,7 +39,7 @@ def account():
     uid = session['user_id']
     with engine.connect() as conn:
         user = dict(conn.execute(
-            sql_text("SELECT user_id, full_name, preferred_language, created_at FROM users WHERE user_id = :uid"),
+            sql_text("SELECT user_id, full_name, created_at FROM users WHERE user_id = :uid"),
             {"uid": uid}
         ).fetchone()._mapping)
         rows = conn.execute(
@@ -86,7 +86,8 @@ def geocode():
 def bike_plot():
     if not session.get('user_id'):
         return redirect(url_for('auth.login'))
-    return render_template("bike_plot.html")
+    station_id = request.args.get('station_id', 1, type=int)
+    return render_template("bike_plot.html", station_id=station_id)
 
 @main_bp.route("/bike/number")
 def bike_return():

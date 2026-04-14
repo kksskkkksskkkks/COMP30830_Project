@@ -36,10 +36,6 @@ def run_sql():
                         ( \
                             255 \
                         ) NOT NULL,
-                            preferred_language VARCHAR \
-                        ( \
-                            10 \
-                        ) DEFAULT 'en',
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                             PRIMARY KEY \
                         ( \

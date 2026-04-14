@@ -23,8 +23,8 @@ def load_logged_in_user():
         engine = get_db()
         with engine.connect() as conn:
             query = text("""
-                SELECT user_id, full_name, preferred_language, created_at 
-                FROM users 
+                SELECT user_id, full_name, created_at
+                FROM users
                 WHERE user_id = :user_id
             """)
             result = conn.execute(query, {"user_id": user_id}).fetchone()
@@ -77,8 +77,6 @@ def register():
     user_id = request.form.get('user_id')
     password = request.form.get('password')
     full_name = request.form.get('full_name')
-    preferred_language = request.form.get('preferred_language', 'en')
-
     if not user_id or not password:
         return render_template('register.html', error='user_id and password are required')
 
@@ -97,15 +95,14 @@ def register():
             return render_template('register.html', error='User ID already exists')
 
         insert_query = text("""
-            INSERT INTO users (user_id, full_name, password_hash, preferred_language)
-            VALUES (:user_id, :full_name, :password_hash, :preferred_language)
+            INSERT INTO users (user_id, full_name, password_hash)
+            VALUES (:user_id, :full_name, :password_hash)
         """)
 
         conn.execute(insert_query, {
             "user_id": user_id,
             "full_name": full_name,
             "password_hash": hashed_pw,
-            "preferred_language": preferred_language
         })
 
     return redirect(url_for('auth.login'))

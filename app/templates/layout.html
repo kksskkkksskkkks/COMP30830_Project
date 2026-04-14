@@ -21,16 +21,6 @@
         </div>
 
         <div class="navbar-links">
-            <div class="lang-wrapper">
-                <select class="lang-select" id="lang-switcher">
-                    <option value="en">EN</option>
-                    <option value="fr">FR</option>
-                    <option value="it">IT</option>
-                    <option value="zh">繁中</option>
-                    <option value="cn">简中</option>
-                    <option value="jp">JP</option>
-                </select>
-            </div>
             {% if session.get('user_id') %}
                 <a href="/account" class="btn btn-sm">Account</a>
                 <a href="/auth/logout" class="btn btn-sm">Log Out</a>

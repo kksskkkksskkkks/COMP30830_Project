@@ -44,7 +44,6 @@ TEST_PASSWORD_HASH = generate_password_hash(TEST_PASSWORD)
 FAKE_USER_MAPPING = {
     "user_id": TEST_USER_ID,
     "full_name": "Test User",
-    "preferred_language": "en",
     "created_at": "2024-01-01 00:00:00",
 }
 
