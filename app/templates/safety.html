@@ -1,0 +1,168 @@
+{% extends "layout.html" %}
+
+{% block title %} — Safety{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+
+    <!-- Page Header -->
+    <div style="margin-bottom: 2.5rem;">
+        <h1 style="font-size: 2.4rem; line-height: 1.2; margin-bottom: 0.75rem;">Ride Safe in Dublin</h1>
+        <p style="font-size: 1rem; color: #555; font-weight: 400; max-width: 640px;">
+            Before you hop on a Dublin Bike, take a moment to review the rules of the road.
+            Cycling is fun — and safe — when everyone knows what to expect.
+        </p>
+    </div>
+
+    <!-- Section 1: Keep Left -->
+    <div class="card" style="border-left: 6px solid var(--primary);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.2rem; margin: 0;">Keep Left — Ireland Drives on the Left</h2>
+        </div>
+        <p style="color: #444; font-weight: 400; margin-bottom: 0.75rem;">
+            Ireland follows left-hand traffic. If you are visiting from a country that drives on the right,
+            this is the single most important thing to remember.
+        </p>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem;">
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">Always cycle on the <strong>left-hand side</strong> of the road or in the designated cycle lane.</span>
+            </li>
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">When turning, give way to oncoming traffic from the right at junctions.</span>
+            </li>
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">At roundabouts, traffic circulates <strong>clockwise</strong>. Enter from the left and give way to cyclists and cars already in the roundabout.</span>
+            </li>
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">Look right first (then left) when pulling out from a side road or junction.</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Section 2: Traffic Laws -->
+    <div class="card" style="border-left: 6px solid var(--secondary);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.2rem; margin: 0;">Dublin Traffic Laws for Cyclists</h2>
+        </div>
+        <p style="color: #444; font-weight: 400; margin-bottom: 0.75rem;">
+            Cyclists in Ireland are subject to the same rules of the road as motor vehicles.
+            Violations can result in on-the-spot fines.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem;">
+            <div style="background: #fafafa; border: 2px solid #111; border-radius: 12px; padding: 1rem;">
+                <p style="font-weight: 800; margin-bottom: 0.4rem;">Red Lights</p>
+                <p style="font-weight: 400; color: #444; font-size: 0.9rem;">Always stop at red traffic lights. Running a red light carries a fixed-charge notice (€40).</p>
+            </div>
+            <div style="background: #fafafa; border: 2px solid #111; border-radius: 12px; padding: 1rem;">
+                <p style="font-weight: 800; margin-bottom: 0.4rem;">Footpaths</p>
+                <p style="font-weight: 400; color: #444; font-size: 0.9rem;">Cycling on footpaths (pavements) is illegal in Ireland. Use cycle lanes or the road.</p>
+            </div>
+            <div style="background: #fafafa; border: 2px solid #111; border-radius: 12px; padding: 1rem;">
+                <p style="font-weight: 800; margin-bottom: 0.4rem;">Mobile Phones</p>
+                <p style="font-weight: 400; color: #444; font-size: 0.9rem;">Using a handheld phone while cycling is illegal and dangerous. Pull over safely if you need your phone.</p>
+            </div>
+            <div style="background: #fafafa; border: 2px solid #111; border-radius: 12px; padding: 1rem;">
+                <p style="font-weight: 800; margin-bottom: 0.4rem;">Alcohol</p>
+                <p style="font-weight: 400; color: #444; font-size: 0.9rem;">It is an offence to cycle under the influence of alcohol or drugs. The same legal framework applies as for motorists.</p>
+            </div>
+            <div style="background: #fafafa; border: 2px solid #111; border-radius: 12px; padding: 1rem;">
+                <p style="font-weight: 800; margin-bottom: 0.4rem;">Night Cycling</p>
+                <p style="font-weight: 400; color: #444; font-size: 0.9rem;">Dublin Bikes have built-in lights. Ensure they are functioning before riding after dark. White front, red rear.</p>
+            </div>
+            <div style="background: #fafafa; border: 2px solid #111; border-radius: 12px; padding: 1rem;">
+                <p style="font-weight: 800; margin-bottom: 0.4rem;">Signals &amp; Bells</p>
+                <p style="font-weight: 400; color: #444; font-size: 0.9rem;">Use hand signals when turning. Alert pedestrians with the bike bell — do not shout or weave aggressively.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Riding Tips -->
+    <div class="card" style="border-left: 6px solid var(--accent);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.2rem; margin: 0;">General Riding Safety Tips</h2>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.7rem;">
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                <span class="badge" style="flex-shrink: 0; font-size: 0.7rem; background: var(--accent);">Helmet</span>
+                <p style="font-weight: 400; color: #444; margin: 0;">Wearing a helmet is not legally required in Ireland, but it is <strong>strongly recommended</strong>. It significantly reduces the risk of serious head injury.</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                <span class="badge" style="flex-shrink: 0; font-size: 0.7rem; background: var(--secondary);">Visibility</span>
+                <p style="font-weight: 400; color: #444; margin: 0;">Wear bright or reflective clothing, especially on overcast Dublin days. Make yourself visible to drivers at all times.</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                <span class="badge" style="flex-shrink: 0; font-size: 0.7rem; background: var(--accent);">Bike Check</span>
+                <p style="font-weight: 400; color: #444; margin: 0;">Before riding, quickly check the tyres, brakes, and seat height. If the bike feels unsafe, return it and take a different one from the station.</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                <span class="badge" style="flex-shrink: 0; font-size: 0.7rem; background: var(--secondary);">Tram Tracks</span>
+                <p style="font-weight: 400; color: #444; margin: 0;">Dublin's Luas tram tracks are a hazard for narrow bicycle wheels. Cross tram lines at a <strong>90° angle</strong> to avoid your wheel slipping into the groove.</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                <span class="badge" style="flex-shrink: 0; font-size: 0.7rem; background: var(--accent);">Bus Lanes</span>
+                <p style="font-weight: 400; color: #444; margin: 0;">Cyclists are permitted to use bus lanes in Dublin during their hours of operation. Stay alert to buses pulling in at stops.</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+                <span class="badge" style="flex-shrink: 0; font-size: 0.7rem; background: var(--secondary);">Dooring</span>
+                <p style="font-weight: 400; color: #444; margin: 0;">Keep a safe distance from parked cars to avoid being hit by a suddenly opened door. This is one of the most common urban cycling hazards.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Dublin Bikes Rules -->
+    <div class="card" style="border-left: 6px solid var(--primary);">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <h2 style="font-size: 1.2rem; margin: 0;">Dublin Bikes Scheme Rules</h2>
+        </div>
+        <p style="color: #444; font-weight: 400; margin-bottom: 0.75rem;">
+            As a Dublin Bikes user, you are responsible for the bike while it is checked out to you.
+        </p>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem;">
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">The first <strong>30 minutes</strong> are free for Annual Subscribers; usage beyond this is charged incrementally.</span>
+            </li>
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">Always return the bike securely to a docking station — listen for the green light and click to confirm the lock.</span>
+            </li>
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">Only one person per bike. Carrying passengers is not permitted.</span>
+            </li>
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">Bikes must not be taken outside the scheme's operating area. Check the map for station boundaries.</span>
+            </li>
+            <li style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span style="color: var(--primary); font-weight: 800; flex-shrink: 0;">→</span>
+                <span style="font-weight: 400; color: #444;">Report damaged or broken bikes using the fault button on the docking terminal or through the Dublin Bikes website.</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Emergency Info -->
+    <div style="background: var(--primary); border: var(--border-thick); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-solid); color: white;">
+        <h2 style="font-size: 1.1rem; margin-bottom: 0.6rem; color: white;">Emergency &amp; Useful Numbers</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <p style="font-weight: 800; font-size: 0.9rem;">Emergency Services</p>
+                <p style="font-weight: 400; font-size: 0.9rem;">Call <strong>999</strong> or <strong>112</strong></p>
+            </div>
+            <div>
+                <p style="font-weight: 800; font-size: 0.9rem;">Dublin Bikes Customer Service</p>
+                <p style="font-weight: 400; font-size: 0.9rem;"><strong>1800 927 000</strong> (freephone)</p>
+            </div>
+            <div>
+                <p style="font-weight: 800; font-size: 0.9rem;">Garda (Police) Non-Emergency</p>
+                <p style="font-weight: 400; font-size: 0.9rem;"><strong>01 666 9500</strong></p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

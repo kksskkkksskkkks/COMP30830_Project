@@ -1,59 +1,325 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta name="viewport" content="initial-scale=1.0">
-    <meta charset="utf-8">
-    <title>Simple Map</title>
-    <style>
-        /* #map {
-            height: 100%;
-        }
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        } */
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Prevents scrollbars */
-        }
+{% extends "layout.html" %}
 
-        #map {
-            height: 100%;
-        }
+{% block body_class %}page-map{% endblock %}
 
-        /* The Weather Box Styling */
-        #weather {
-            position: absolute;
-            top: 20px;         /* Distance from top */
-            right: 20px;       /* Distance from right */
-            z-index: 10;       /* High number so it stays above map layers */
-            
-            /* Look and Feel */
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            
-            /* Typography */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-width: 150px;
-            text-align: center;
-            color: #333;
-            pointer-events: auto; /* Ensures you can still click it if needed */
-        }
+{% block title %} — Map{% endblock %}
 
-    </style>
-</head>
-<body>
-    <div id="map"></div>
-    <div id="weather"></div>
+{% block content %}
 
+<!-- ═══════════════════════════════════════════════════════
+     HERO / SERVICE INTRO
+     ═══════════════════════════════════════════════════════ -->
+<div style="margin-bottom: 1.5rem;">
+    <div style="
+        background: var(--secondary);
+        border: var(--border-thick);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-solid);
+        padding: 1.75rem 2rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        align-items: center;
+        justify-content: space-between;
+    ">
+        <!-- Left: Title + tagline + stats -->
+        <div style="flex: 1; min-width: 240px;">
+            <h1 style="font-size: 1.9rem; line-height: 1.1; margin-bottom: 0.4rem;">
+                Dublin Bikes
+            </h1>
+            <p style="font-weight: 400; color: #333; font-size: 0.95rem; margin-bottom: 1.1rem; text-transform: none; letter-spacing: 0;">
+                Dublin's public bike-sharing scheme — pick up a bike at any station, drop it off at any other.
+                Explore the city at your own pace.
+            </p>
+            <!-- Quick stats -->
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <div style="
+                    background: var(--accent);
+                    border: var(--border-thick);
+                    border-radius: var(--radius-md);
+                    padding: 0.45rem 0.9rem;
+                    box-shadow: var(--shadow-solid-sm);
+                ">
+                    <span style="font-weight: 800; font-size: 1.1rem;">100+</span>
+                    <span style="font-weight: 600; font-size: 0.78rem; display: block; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Stations</span>
+                </div>
+                <div style="
+                    background: var(--accent);
+                    border: var(--border-thick);
+                    border-radius: var(--radius-md);
+                    padding: 0.45rem 0.9rem;
+                    box-shadow: var(--shadow-solid-sm);
+                ">
+                    <span style="font-weight: 800; font-size: 1.1rem;">1,500</span>
+                    <span style="font-weight: 600; font-size: 0.78rem; display: block; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Bikes</span>
+                </div>
+                <div style="
+                    background: white;
+                    border: var(--border-thick);
+                    border-radius: var(--radius-md);
+                    padding: 0.45rem 0.9rem;
+                    box-shadow: var(--shadow-solid-sm);
+                ">
+                    <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">Free</span>
+                    <span style="font-weight: 600; font-size: 0.78rem; display: block; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">First 30 min</span>
+                </div>
+            </div>
+        </div>
 
-    <script src="{{ url_for('static', filename='index.js') }}"></script>
+        <!-- Right: Info page links -->
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; min-width: 200px;">
+            <a href="/faq" style="
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                background: white;
+                border: var(--border-thick);
+                border-radius: var(--radius-md);
+                padding: 0.85rem 1.1rem;
+                box-shadow: var(--shadow-solid-sm);
+                text-decoration: none;
+                transition: transform 0.1s, box-shadow 0.1s;
+                font-weight: 700;
+                font-size: 0.88rem;
+            " onmousedown="this.style.transform='translate(4px,4px)';this.style.boxShadow='none'"
+               onmouseup="this.style.transform='';this.style.boxShadow='var(--shadow-solid-sm)'"
+               onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow-solid-sm)'">
+                <span style="font-size: 1.4rem; flex-shrink: 0;">❓</span>
+                <div>
+                    <div style="text-transform: uppercase; letter-spacing: 0.5px;">How to Use</div>
+                    <div style="font-weight: 400; font-size: 0.78rem; color: #555; text-transform: none; letter-spacing: 0;">Getting started &amp; FAQs</div>
+                </div>
+                <span style="margin-left: auto; font-size: 1rem; color: #888;">›</span>
+            </a>
+            <a href="/safety" style="
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                background: white;
+                border: var(--border-thick);
+                border-radius: var(--radius-md);
+                padding: 0.85rem 1.1rem;
+                box-shadow: var(--shadow-solid-sm);
+                text-decoration: none;
+                transition: transform 0.1s, box-shadow 0.1s;
+                font-weight: 700;
+                font-size: 0.88rem;
+            " onmousedown="this.style.transform='translate(4px,4px)';this.style.boxShadow='none'"
+               onmouseup="this.style.transform='';this.style.boxShadow='var(--shadow-solid-sm)'"
+               onmouseleave="this.style.transform='';this.style.boxShadow='var(--shadow-solid-sm)'">
+                <span style="font-size: 1.4rem; flex-shrink: 0;">🛡️</span>
+                <div>
+                    <div style="text-transform: uppercase; letter-spacing: 0.5px;">Safety Guide</div>
+                    <div style="font-weight: 400; font-size: 0.78rem; color: #555; text-transform: none; letter-spacing: 0;">Rules of the road in Dublin</div>
+                </div>
+                <span style="margin-left: auto; font-size: 1rem; color: #888;">›</span>
+            </a>
+        </div>
+    </div>
+</div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ MY_API_KEY }}&callback=initMap" async defer></script>
-</body>
-</html>
+<!-- ═══════════════════════════════════════════════════════
+     MAP
+     ═══════════════════════════════════════════════════════ -->
+<div id="app-layout" style="height: 620px;">
+
+    <div id="results-panel" class="hidden" role="region" aria-label="Nearby stations">
+        <div id="panel-header">
+            <span id="panel-title">Nearby Stations</span>
+            <button id="btn-panel-close" aria-label="Close station list">&#x2715;</button>
+        </div>
+        <div id="search-box-area">
+            <div id="search-group" role="search" aria-label="Search address or place">
+                <label for="search-input" class="sr-only">Search address or place</label>
+                <input id="search-input" type="text" placeholder="Search address or place…" autocomplete="off">
+                <button id="btn-locate" class="btn-icon" aria-label="Use my location" title="Use my location">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </button>
+                <button id="btn-search" class="btn-icon" aria-label="Search" title="Search">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </button>
+                <button id="btn-clear" class="btn-icon btn-icon-muted" aria-label="Clear search" title="Clear search" style="display:none;">
+                    &#x2715;
+                </button>
+            </div>
+        </div>
+        <ul id="station-list" aria-live="polite" aria-label="Station list">
+            <li class="list-empty-state" id="list-empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <p>Search an address or use<br>your location to find nearby stations.</p>
+            </li>
+        </ul>
+    </div>
+
+    <div id="map" role="application" aria-label="Dublin bike stations map"></div>
+
+    <div id="map-overlay">
+        <button id="btn-panel-toggle" aria-label="Open station search" aria-expanded="false" aria-controls="results-panel">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </button>
+        <div id="weather" aria-live="polite" aria-label="Current weather"></div>
+        <div id="map-legend" aria-label="Map pin colour legend">
+            <div class="legend-row"><span class="legend-dot" style="background:var(--secondary)"></span>Available</div>
+            <div class="legend-row"><span class="legend-dot" style="background:var(--accent)"></span>No bikes</div>
+            <div class="legend-row"><span class="legend-dot" style="background:var(--primary)"></span>Station full</div>
+            <div class="legend-row"><span class="legend-dot" style="background:#757575"></span>Closed</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     HOW IT WORKS
+     ═══════════════════════════════════════════════════════ -->
+<div style="margin-top: 1.75rem;">
+
+    <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.75rem;">
+        <h2 style="font-size: 1.1rem; margin: 0;">How It Works</h2>
+        <a href="/faq" style="font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px;">Full FAQ ›</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+
+        <!-- Step 1 -->
+        <div class="card" style="border-top: 5px solid var(--primary); margin-bottom: 0;">
+            <div style="
+                background: var(--primary);
+                color: white;
+                font-weight: 800;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                display: inline-block;
+                padding: 0.2rem 0.6rem;
+                border-radius: 20px;
+                margin-bottom: 0.75rem;
+            ">Step 1</div>
+            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🎫</div>
+            <h3 style="font-size: 0.9rem; margin-bottom: 0.4rem; text-transform: none; letter-spacing: 0;">Get a Subscription</h3>
+            <p style="font-weight: 400; color: #555; font-size: 0.85rem; margin: 0;">
+                Sign up for an Annual Subscription (€35/year) at <strong>dublinbikes.ie</strong>,
+                or grab a 3-Day Visitor Pass (€5) at any docking terminal.
+            </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="card" style="border-top: 5px solid var(--secondary); margin-bottom: 0;">
+            <div style="
+                background: var(--secondary);
+                color: var(--text-color);
+                font-weight: 800;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                display: inline-block;
+                padding: 0.2rem 0.6rem;
+                border-radius: 20px;
+                margin-bottom: 0.75rem;
+            ">Step 2</div>
+            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">📍</div>
+            <h3 style="font-size: 0.9rem; margin-bottom: 0.4rem; text-transform: none; letter-spacing: 0;">Find a Station</h3>
+            <p style="font-weight: 400; color: #555; font-size: 0.85rem; margin: 0;">
+                Use the map above to locate a station near you with available bikes.
+                Check real-time availability before heading over.
+            </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="card" style="border-top: 5px solid var(--accent); margin-bottom: 0;">
+            <div style="
+                background: var(--accent);
+                color: var(--text-color);
+                font-weight: 800;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                display: inline-block;
+                padding: 0.2rem 0.6rem;
+                border-radius: 20px;
+                margin-bottom: 0.75rem;
+            ">Step 3</div>
+            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🔓</div>
+            <h3 style="font-size: 0.9rem; margin-bottom: 0.4rem; text-transform: none; letter-spacing: 0;">Unlock &amp; Ride</h3>
+            <p style="font-weight: 400; color: #555; font-size: 0.85rem; margin: 0;">
+                At the terminal, enter your card number and PIN. Pull out the bike from the
+                indicated dock. The first 30 minutes are free — return to any station when done.
+            </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="card" style="border-top: 5px solid var(--primary); margin-bottom: 0;">
+            <div style="
+                background: var(--primary);
+                color: white;
+                font-weight: 800;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                display: inline-block;
+                padding: 0.2rem 0.6rem;
+                border-radius: 20px;
+                margin-bottom: 0.75rem;
+            ">Step 4</div>
+            <div style="font-size: 1.6rem; margin-bottom: 0.5rem;">🔒</div>
+            <h3 style="font-size: 0.9rem; margin-bottom: 0.4rem; text-transform: none; letter-spacing: 0;">Return the Bike</h3>
+            <p style="font-weight: 400; color: #555; font-size: 0.85rem; margin: 0;">
+                Push the bike firmly into any empty dock until the green light confirms it's locked.
+                Use the map to check for free docks before you arrive.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Bottom CTA strip -->
+    <div style="
+        background: var(--accent);
+        border: var(--border-thick);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.75rem;
+        box-shadow: var(--shadow-solid);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    ">
+        <div>
+            <p style="font-weight: 800; font-size: 0.95rem; margin-bottom: 0.2rem;">New to Dublin Bikes?</p>
+            <p style="font-weight: 400; color: #444; font-size: 0.85rem; margin: 0;">
+                Read the full FAQ or check the Safety guide before your first ride.
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="/faq" class="btn btn-sm" style="background: white;">❓ FAQ</a>
+            <a href="/safety" class="btn btn-sm" style="background: white;">🛡️ Safety Guide</a>
+            {% if not session.get('user_id') %}
+            <a href="/auth/register" class="btn btn-primary btn-sm">Sign Up Free</a>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    <meta id="app-config"
+          data-logged-in="{{ (session.get('user_id') is not none) | tojson }}"
+          data-map-id="{{ MAP_ID }}">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/nearby.js') }}"></script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key={{ MAP_KEY }}&libraries=places,marker&callback=initMap"
+        async defer>
+    </script>
+{% endblock %}

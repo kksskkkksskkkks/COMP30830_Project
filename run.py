@@ -1,7 +1,10 @@
-from app import create_app
-from config import DevelopmentConfig
+from dotenv import load_dotenv
+load_dotenv()
 
-app = create_app(DevelopmentConfig)
+from app import create_app
+from config import DevelopmentConfig,ProductionConfig
+
+app = create_app(ProductionConfig)
 
 if __name__ == "__main__":
     

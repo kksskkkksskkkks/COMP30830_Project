@@ -1,0 +1,200 @@
+{% extends "layout.html" %}
+
+{% block title %} — Bike Sharing Prediction System{% endblock %}
+
+{% block head %}
+    <style>
+        .center-wrapper {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 72px);
+            padding: 2rem 1.5rem;
+        }
+
+        .prediction-box {
+            background: #fff;
+            border: var(--border-thick);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-solid);
+            padding: 2rem;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .prediction-box h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .form-group input[type="date"],
+        .form-group input[type="time"],
+        .form-group input[type="number"] {
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.55rem 0.8rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-md);
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        .form-group input:focus {
+            box-shadow: 0 0 0 3px var(--primary);
+            background: #fff;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .button-group .btn {
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-stand-style {
+            background-color: var(--secondary);
+        }
+
+        .result-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-md);
+            background-color: var(--bg-color);
+            box-shadow: var(--shadow-solid-sm);
+            display: none;
+        }
+
+        .result-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-content {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .error {
+            color: var(--primary);
+            font-size: 0.85rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="center-wrapper">
+
+<div class="prediction-box">
+    <h2>Station Prediction System</h2>
+
+    <div class="form-group">
+        <label for="date">Prediction Date:</label>
+        <input type="date" id="date" lang="en" required>
+    </div>
+
+    <div class="form-group">
+        <label for="time">Prediction Time:</label>
+        <input type="time" id="time" lang="en" required>
+    </div>
+
+    <div class="form-group">
+        <label for="station_id">Station ID:</label>
+        <input type="number" id="station_id" placeholder="e.g., 42" min="1" max="117" required>
+    </div>
+
+    <div class="button-group">
+        <button class="btn btn-primary" onclick="makePrediction('bike')">Predict Bikes</button>
+        <button class="btn btn-stand-style" onclick="makePrediction('stand')">Predict Stands</button>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <div class="result-title" id="resultTitle">Prediction Result:</div>
+        <div class="result-content" id="resultContent"></div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set default date to today
+    document.getElementById('date').valueAsDate = new Date();
+
+    const now = new Date();
+    document.getElementById('time').value =
+        String(now.getHours()).padStart(2, '0') + ":" + String(now.getMinutes()).padStart(2, '0');
+
+    // Core prediction function
+    async function makePrediction(type) {
+
+        const date = document.getElementById('date').value;
+        const time = document.getElementById('time').value;
+        const station_id = parseInt(document.getElementById('station_id').value);
+
+        const resultBox = document.getElementById('resultBox');
+        const resultContent = document.getElementById('resultContent');
+        const resultTitle = document.getElementById('resultTitle');
+
+        // Input validation
+        if (!date || !time || isNaN(station_id) || station_id < 1 || station_id > 117) {
+            resultBox.style.display = 'block';
+            resultTitle.innerText = "Input Error";
+            resultContent.innerHTML = `<span class="error">Please complete the date and time, and ensure Station ID is between 1 and 117!</span>`;
+            return;
+        }
+
+        // Show loading state
+        resultBox.style.display = 'block';
+        resultTitle.innerText = type === 'bike' ? "Predicting available bikes..." : "Predicting empty stands...";
+        resultContent.innerHTML = `<span style="font-size: 0.85rem; font-weight: 600; color: #888;">Sending request...</span>`;
+
+        const endpoint = type === 'bike' ? '/predict/bike' : '/predict/stand';
+        const params = new URLSearchParams({ date, time, station_id });
+
+        try {
+            const response = await fetch(`${endpoint}?${params}`, { headers: { 'Accept': 'application/json' } });
+            const data = await response.json();
+
+            if (response.ok) {
+                resultTitle.innerText = "Prediction Successful";
+                if (type === 'bike') {
+                    resultContent.innerHTML = `Estimated Available Bikes: <span>${data.predicted_available_bikes}</span>`;
+                } else {
+                    resultContent.innerHTML = `Estimated Empty Stands: <span>${data.predicted_empty_stands}</span>`;
+                }
+            } else {
+                // Backend returned 400, 404, or 500 error
+                resultTitle.innerText = "Prediction Failed";
+                resultContent.innerHTML = `<span class="error">${data.error || 'Unknown Error'}<br>${data.details || ''}</span>`;
+            }
+        } catch (error) {
+            // Network error or backend not running
+            resultTitle.innerText = "Connection Failed";
+            resultContent.innerHTML = `<span class="error">Could not connect to the server.<br>Details: ${error.message}</span>`;
+        }
+    }
+</script>
+{% endblock %}

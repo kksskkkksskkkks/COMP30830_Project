@@ -2,7 +2,7 @@
 This file includes business logic related functions (e.g. bike, weather, google map)
 """
 from config import Config
-from flask import Blueprint, g, jsonify, render_template
+from flask import Blueprint, g, jsonify, render_template, session, redirect, url_for, request
 import requests
 from datetime import datetime, timezone
 from flask_caching import Cache
@@ -20,7 +20,80 @@ cache = Cache()
 
 @main_bp.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", MAP_KEY=Config.MAP_KEY, MAP_ID=Config.MAP_ID)
+
+@main_bp.route("/safety")
+def safety():
+    return render_template("safety.html")
+
+@main_bp.route("/faq")
+def faq():
+    return render_template("faq.html")
+
+@main_bp.route("/account")
+def account():
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    from sqlalchemy import text as sql_text
+    engine = get_db()
+    uid = session['user_id']
+    with engine.connect() as conn:
+        user = dict(conn.execute(
+            sql_text("SELECT user_id, full_name, created_at FROM users WHERE user_id = :uid"),
+            {"uid": uid}
+        ).fetchone()._mapping)
+        rows = conn.execute(
+            sql_text("""
+                SELECT f.station_number, s.name AS station_name, f.added_at
+                FROM user_favorites f
+                JOIN station s ON s.number = f.station_number
+                WHERE f.user_id = :uid
+                ORDER BY f.added_at DESC
+            """),
+            {"uid": uid}
+        ).fetchall()
+        favorites = [dict(r._mapping) for r in rows]
+    return render_template('account.html', user=user, favorites=favorites)
+
+
+@main_bp.route("/api/geocode")
+def geocode():
+    q = request.args.get("q", "").strip()
+    if not q:
+        return jsonify([])
+    try:
+        resp = requests.get(
+            "https://photon.komoot.io/api/",
+            params={"q": q, "limit": 5, "bbox": "-6.32,53.32,-6.14,53.40"},  # (lng_min,lat_min,lng_max,lat_max) Limit search result to Dublin only
+            headers={"User-Agent": "DublinBikesApp/1.0"},
+            timeout=5,
+        )
+        results = []
+        for f in resp.json().get("features", []):
+            props  = f.get("properties", {})
+            coords = f["geometry"]["coordinates"]   # [lng, lat]
+            parts  = [props.get("name"), props.get("street"), props.get("district") or props.get("suburb")]
+            name   = ", ".join(p for p in parts if p)
+            if not name:
+                continue
+            results.append({"name": name, "lat": coords[1], "lng": coords[0]})
+        return jsonify(results)
+    except Exception:
+        return jsonify([])
+
+
+@main_bp.route("/bike/plot")
+def bike_plot():
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    station_id = request.args.get('station_id', 1, type=int)
+    return render_template("bike_plot.html", station_id=station_id)
+
+@main_bp.route("/bike/number")
+def bike_return():
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    return render_template("bike_return_number.html")
 
 
 # 1. Bike
@@ -78,11 +151,16 @@ def get_all_stations_current(): # Originally called "bikes()"
 # 1.4 get specific station availiability from DB
 @main_bp.route('/db/available/<int:station_id>')
 def get_specific_station(station_id):
+    from sqlalchemy import text as sql_text
     engine = get_db()
     data = []
-    rows = engine.execute("SELECT available_bikes from availability where number = {};".format(station_id))
-    for row in rows:
-        data.append(dict(row))
+    with engine.connect() as conn:
+        rows = conn.execute(
+            sql_text("SELECT available_bikes FROM availability WHERE number = :station_id"),
+            {"station_id": station_id}
+        )
+        for row in rows:
+            data.append(dict(row))
     return jsonify(available=data)
 
 
@@ -90,7 +168,7 @@ def get_specific_station(station_id):
 # ✅ 2.1 Scrape/fetch from API
 # ====== TODO: Request periodically without user's action? ======
 def get_weather():
-    response = requests.get("https://api.openweathermap.org/data/2.5/weather", params={"appid": Config.WEATHER_KEY, "q": "dublin, ie"})
+    response = requests.get("https://api.openweathermap.org/data/2.5/weather", params={"appid": Config.WEATHER_KEY, "q": "dublin, ie", "units": "metric"})
     return response.json() if response.status_code == 200 else {}
 
 

@@ -1,0 +1,923 @@
+/* ==========================================================================
+   1. GLOBAL VARIABLES & TYPOGRAPHY
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+:root {
+    /* City Pop Color Palette */
+    --bg-color: #fdfaf6;       /* Warm off-white */
+    --text-color: #111111;     /* Near black for high contrast */
+    --primary: #ff5e5e;        /* Vibrant Coral/Red */
+    --secondary: #00d2d3;      /* Bright Teal */
+    --accent: #ffbc00;         /* Mustard Yellow */
+    --disabled: #e0e0e0;
+
+    /* Signature City Pop Visuals */
+    --border-dark: #111111;
+    --border-thick: 3px solid var(--border-dark);
+    --shadow-solid: 6px 6px 0px var(--border-dark);
+    --shadow-solid-sm: 4px 4px 0px var(--border-dark);
+    --radius-md: 12px;
+    --radius-lg: 20px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding-top: 72px;
+}
+
+h1, h2, h3 {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Centred max-width wrapper for non-map pages */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.container-sm {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* ==========================================================================
+   ACCESSIBILITY UTILITIES
+   ========================================================================== */
+
+/* Visually hide content but keep it reachable by screen readers */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Skip-to-content link — visible only on focus */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 9999;
+    background: var(--accent);
+    color: var(--text-color);
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    transition: top 0.2s;
+}
+
+.skip-link:focus {
+    top: 0.75rem;
+}
+
+/* Keyboard focus ring — replaces browser default with on-brand style */
+:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* Suppress focus ring for mouse users */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ==========================================================================
+   2. NAVIGATION BAR
+   ========================================================================== */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    height: 72px;
+    background-color: var(--secondary);
+    border-bottom: var(--border-thick);
+    box-shadow: 0px 4px 0px var(--border-dark);
+    flex-shrink: 0;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-color);
+    text-decoration: none;
+    background-color: var(--accent);
+    padding: 0.25rem 0.9rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
+    border: var(--border-thick)
+}
+
+/* ==========================================================================
+   3. BUTTONS
+   ========================================================================== */
+.btn {
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 0.8rem 1.5rem;
+    cursor: pointer;
+    background-color: var(--accent);
+    color: var(--text-color);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
+    transition: all 0.1s ease-in-out;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px var(--border-dark);
+}
+
+/* ==========================================================================
+   4. CARDS (For Bike Stations & Info)
+   ========================================================================== */
+.card {
+    background-color: #ffffff;
+    border: var(--border-thick);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-solid);
+    margin-bottom: 1.5rem;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    border: 2px solid var(--border-dark);
+    border-radius: 20px;
+    background-color: var(--secondary);
+    text-transform: uppercase;
+}
+
+/* ==========================================================================
+   5. MAP & POI (POINTS OF INTEREST) ELEMENTS
+   ========================================================================== */
+
+/* The Map Container */
+.map-wrapper {
+    width: 100%;
+    height: 500px;
+    border: var(--border-thick);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-solid);
+    overflow: hidden; /* Keeps map corners rounded */
+    background-color: #e5e5e5; /* Fallback while map loads */
+}
+
+/* Custom CSS for Map Markers (e.g., using Leaflet.js divIcon) */
+.poi-marker {
+    background-color: var(--accent);
+    border: 2px solid var(--border-dark);
+    border-radius: 50%;
+    box-shadow: 2px 2px 0px var(--border-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 800;
+    transition: transform 0.2s;
+}
+
+.poi-marker.active-station {
+    background-color: var(--secondary);
+}
+
+.poi-marker:hover {
+    transform: scale(1.2);
+    cursor: pointer;
+    z-index: 1000 !important;
+}
+
+/* Overriding default Map Popups (Leaflet specific, but adaptable) */
+.leaflet-popup-content-wrapper {
+    background-color: #fff !important;
+    border: var(--border-thick) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-solid-sm) !important;
+    padding: 0 !important;
+}
+
+.leaflet-popup-tip {
+    /* Hides or heavily styles the little triangle at the bottom of standard popups */
+    border: 2px solid var(--border-dark);
+    background: #fff;
+}
+
+.poi-popup-content h3 {
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+}
+
+/* Sidebar for listing POIs next to the map */
+.poi-list {
+    list-style: none;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.poi-list-item {
+    background: #fff;
+    border: 2px solid var(--border-dark);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 3px 3px 0px var(--border-dark);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.poi-list-item:hover {
+    background-color: var(--accent);
+}
+
+/* ==========================================================================
+   6. LAYOUT — MAP PAGE (index.html) & SHARED UTILITIES
+   ========================================================================== */
+
+body.page-map {
+    overflow-y: auto;
+}
+
+body.page-map .page-content {
+    padding: 1.5rem;
+}
+
+/* Small button variant */
+.btn-sm {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.8rem;
+    background-color: var(--bg-color);
+    border: var(--border-thick);
+    box-shadow: var(--shadow-solid-sm);
+    /* border-color: transparent; */
+}
+
+.navbar-left-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.page-content {
+    overflow-y: auto;
+}
+
+/* ── Search box inside the panel ─────────────────────────────────────────── */
+#search-box-area {
+    padding: 0.6rem;
+    border-bottom: var(--border-thick);
+    flex-shrink: 0;
+    position: relative;
+}
+
+#search-group {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--bg-color);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    padding: 0.3rem 0.75rem;
+    min-width: 0;
+    transition: box-shadow 0.15s;
+}
+
+#search-group:focus-within {
+    box-shadow: 0 0 0 3px var(--primary);
+    background: #fff;
+}
+
+#search-input {
+    flex: 1;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.88rem;
+    border: none;
+    outline: none;
+    background: transparent;
+    min-width: 0;
+    color: var(--text-color);
+}
+
+#search-input::placeholder {
+    color: #888;
+}
+
+/* Icon-only buttons inside the search group */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    color: var(--text-color);
+    padding: 0.1rem 0.3rem;
+    border-radius: var(--radius-md);
+    line-height: 1;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+}
+
+.btn-icon:hover {
+    background: var(--accent);
+}
+
+.btn-icon-muted {
+    color: #555;
+    font-size: 0.9rem;
+}
+
+/* ── Map search box
+ suggestions dropdown ─────────────────────────────────────── */
+#search-suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--bg-color);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
+    list-style: none;
+    padding: 0.3rem 0;
+    z-index: 9999;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+#search-suggestions.hidden {
+    display: none;
+}
+
+#search-suggestions li {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid #eee;
+}
+
+#search-suggestions li:last-child {
+    border-bottom: none;
+}
+
+#search-suggestions li:hover {
+    background: var(--accent);
+}
+
+/* ── App layout ───────────────────────────────────────────────────────────── */
+#app-layout {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 72px);
+    border: var(--border-thick);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-solid);
+}
+
+/* ── Map overlay (contains floating UI elements positioned over the map) ── */
+#map-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#map-overlay > * {
+    pointer-events: auto;
+}
+
+/* ── Panel toggle tab (floating on left edge of map overlay) ──────────────── */
+#btn-panel-toggle {
+    position: absolute;
+    left: 0;
+    top: 12px;
+    z-index: 10;
+    background: var(--accent);
+    border: var(--border-thick);
+    border-left: none;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 1rem 0.45rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-solid-sm);
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-color);
+    line-height: 1;
+    transition: left 0.28s ease;
+}
+
+#btn-panel-toggle.panel-open {
+    left: 300px;
+}
+
+/* ── Results panel ── */
+#results-panel {
+    width: 300px;
+    min-width: 300px;
+    height: 100%;
+    background: var(--bg-color);
+    border-right: var(--border-thick);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.28s ease, min-width 0.28s ease, border 0.28s ease;
+    z-index: 5;
+}
+
+#results-panel.hidden {
+    width: 0;
+    min-width: 0;
+    border-right: none;
+}
+
+#panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1rem;
+    border-bottom: var(--border-thick);
+    background: var(--secondary);
+    flex-shrink: 0;
+}
+
+#panel-title {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+#btn-panel-close {
+    background: var(--accent);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--text-color);
+    padding: 0.15rem 0.5rem;
+    line-height: 1.4;
+    box-shadow: var(--shadow-solid-sm);
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+#btn-panel-close:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+}
+
+/* Scrollable station list */
+#station-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.6rem;
+    list-style: none;
+}
+
+#station-list .no-results {
+    padding: 1.2rem 0.5rem;
+    font-size: 0.88rem;
+    color: var(--text-color);
+    text-align: center;
+    font-weight: 600;
+}
+
+/* ── Station list empty state ─────────────────────────────────────────────── */
+.list-empty-state {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: 2.5rem 1.5rem;
+    color: #aaa;
+    text-align: center;
+}
+
+.list-empty-state svg {
+    opacity: 0.35;
+    flex-shrink: 0;
+}
+
+.list-empty-state p {
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 0;
+    color: #888;
+}
+
+/* ── Station card ─────────────────────────────────────────────────────────── */
+.station-card {
+    background: #fff;
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    padding: 0.7rem 0.85rem;
+    margin-bottom: 0.8rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-solid-sm);
+    transition: background-color 0.12s;
+}
+
+.station-card:hover {
+    transition: box-shadow 0.15s;
+    transform: scale(1.05);
+    box-shadow: 0 0 0 3px var(--primary);
+}
+
+.station-card.active {
+    transition: box-shadow 0.15s;
+    box-shadow: 0 0 0 3px var(--primary);
+    color: var(--accent);
+}
+
+.sc-name {
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--text-color);
+    margin-bottom: 0.3rem;
+    line-height: 1.35;
+}
+
+.sc-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: nowrap;
+    font-size: 0.78rem;
+    color: var(--text-color);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sc-distance {
+    font-weight: 800;
+}
+
+.sc-stat {
+    color: var(--text-color);
+}
+
+
+/* ── Map fills remaining width ── */
+#map {
+    flex: 1;
+    height: 100%;
+}
+
+/* ── Weather widget ── */
+#weather {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    z-index: 15;
+    background: var(--bg-color);
+    padding: 10px 14px;
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    min-width: 120px;
+    text-align: center;
+    color: var(--text-color);
+    pointer-events: auto;
+}
+
+/* ── Walk radius circle centre point ─────────────────────────────────────── */
+.origin-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+/* ── Map pin colour legend ───────────────────────────────────────────────── */
+#map-legend {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-color);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-solid-sm);
+    padding: 0.4rem 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    z-index: 15;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    white-space: nowrap;
+}
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--text-color);
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--border-dark);
+    flex-shrink: 0;
+}
+
+/* Google Maps Info Window */
+.gm-style .gm-style-iw-c {
+    font-family: 'Poppins', sans-serif !important;
+    background-color: var(--bg-color) !important;
+    border: var(--border-thick) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: var(--shadow-solid-sm) !important;
+    padding: 0 !important;
+    min-width: 280px;
+}
+
+.gm-style .gm-style-iw-d {
+    overflow: hidden !important;
+    padding: 0.75rem !important;
+}
+
+.gm-style .gm-style-iw-t::after {
+    background: var(--bg-color) !important;
+}
+
+/* Hide GM's own close button */
+.gm-style .gm-style-iw-chr {
+    display: none !important;
+}
+
+/* IW header: title + close button side by side */
+.iw-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.iw-title {
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-color);
+}
+
+.iw-close {
+    background: var(--accent);
+    border: var(--border-thick);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-color);
+    padding: 0.1rem 0.35rem;
+    line-height: 1.4;
+    box-shadow: 2px 2px 0px var(--border-dark);
+    flex-shrink: 0;
+    transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.iw-stats {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.iw-chart {
+    width: 280px;
+    height: 150px;
+}
+
+
+/* ── Search origin pin ───────────────────────────────────────────────────── */
+
+/* ── Bike / parking icon images ─────────────────────────────────────────── */
+.sc-icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+.stat-icon {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+/* ── Station pin marker ─────────────────────────────────────────────────── */
+.station-pin {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 52px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.station-pin:hover { transform: scale(1.15); }
+
+.station-pin.station-badge--active {
+    transform: scale(1.25);
+    filter: drop-shadow(0 0 4px var(--primary));
+    z-index: 500;
+}
+
+/* Station pin SVG */
+.pin-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    stroke: var(--border-dark);
+    stroke-width: 2.5;
+}
+
+/* Colour by availability */
+.station-pin[data-avail="good"]    .pin-svg { fill: var(--secondary); }
+.station-pin[data-avail="empty"]   .pin-svg { fill: var(--accent); }
+.station-pin[data-avail="full"]    .pin-svg { fill: var(--primary); }
+.station-pin[data-avail="closed"]  .pin-svg { fill: #757575; }
+.station-pin[data-avail="unknown"] .pin-svg { fill: #9e9e9e; }
+
+/* Number label inside pin */
+.pin-label {
+    position: relative;
+    z-index: 1;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-top: -10px;
+}
+
+/* Compact mode */
+.station-pin.pin--compact {
+    width: 32px;
+    height: 42px;
+}
+.station-pin.pin--compact .pin-label {
+    font-size: 12px;
+    margin-top: -7px;
+}
+
+/* Dot mode */
+.station-pin.pin--dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.35);
+}
+.station-pin.pin--dot .pin-svg   { display: none; }
+.station-pin.pin--dot .pin-label { display: none; }
+
+.station-pin.pin--dot[data-avail="good"]    { background: var(--secondary); }
+.station-pin.pin--dot[data-avail="empty"]   { background: var(--accent); }
+.station-pin.pin--dot[data-avail="full"]    { background: var(--primary); }
+.station-pin.pin--dot[data-avail="closed"]  { background: #757575; }
+.station-pin.pin--dot[data-avail="unknown"] { background: #9e9e9e; }
+
+/* ── Favourite toggle button ─────────────────────────────────────────────── */
+.btn-fav {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #bbb;
+    padding: 0 0.2rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.15s, transform 0.1s;
+}
+
+.btn-fav:hover {
+    color: var(--primary);
+    transform: scale(1.2);
+}
+
+.btn-fav.fav--active {
+    color: var(--primary);
+}
+
+/* ── Auth page animations (used by login.html / register.html) ─────────────── */
+
+.success-anim {
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); }
+    to   { transform: scale(1); }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+.success-bg {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.toast-in {
+    animation: slideDown 0.4s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from { transform: translate(-50%, -100%); opacity: 0; }
+    to   { transform: translate(-50%, 0);    opacity: 1; }
+}

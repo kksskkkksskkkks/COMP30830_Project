@@ -1,0 +1,264 @@
+{% extends "layout.html" %}
+
+{% block title %} — Dual-Model Comprehensive Comparison{% endblock %}
+
+{% block head %}
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <style>
+        .plot-wrapper {
+            background-color: var(--bg-color);
+            padding: 2.5rem 1.5rem 4rem;
+            min-height: calc(100vh - 72px);
+        }
+
+        .plot-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 2rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-solid);
+        }
+
+        .plot-container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            background: var(--bg-color);
+            padding: 1.2rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-md);
+            margin-bottom: 1.25rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .input-group input {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            padding: 0.45rem 0.75rem;
+            border: var(--border-thick);
+            border-radius: var(--radius-md);
+            outline: none;
+            background: #fff;
+            color: var(--text-color);
+        }
+
+        .input-group input:focus {
+            box-shadow: 0 0 0 3px var(--primary);
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .tab-btn {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.55rem 1.4rem;
+            border: var(--border-thick);
+            border-right: none;
+            background: #fff;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: background 0.15s;
+        }
+
+        .tab-btn:first-child { border-radius: var(--radius-md) 0 0 var(--radius-md); }
+        .tab-btn:last-child  { border-radius: 0 var(--radius-md) var(--radius-md) 0; border-right: var(--border-thick); }
+
+        .tab-btn.active {
+            background-color: var(--secondary);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background-color: var(--bg-color);
+        }
+
+        #main-chart { width: 100%; height: 500px; }
+
+        #error-msg {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 0.6rem;
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-height: 1.2rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="plot-wrapper">
+
+<div class="plot-container">
+    <h2>24H Dual-Model Comprehensive Prediction</h2>
+
+    <div class="control-panel">
+        <div class="input-group">
+            <label>Date:</label>
+            <input type="date" id="date-input" lang="en">
+        </div>
+        <div class="input-group">
+            <label>Time:</label>
+            <input type="time" id="time-input" lang="en" value="09:00">
+        </div>
+        <div class="input-group">
+            <label>Station ID:</label>
+            <input type="number" id="station-input" value="{{ station_id }}" min="1" max="117" style="width: 70px;">
+        </div>
+        <button class="btn btn-primary" onclick="fetchData()">Update Prediction</button>
+    </div>
+
+    <div class="tab-container">
+        <button id="btn-all" class="tab-btn active" onclick="switchTab('all')">Comparison</button>
+        <button id="btn-bike" class="tab-btn" onclick="switchTab('bike')">Available Bikes</button>
+        <button id="btn-stand" class="tab-btn" onclick="switchTab('stand')">Available Stands</button>
+    </div>
+
+    <div id="error-msg"></div>
+    <div id="main-chart"></div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const chart = echarts.init(document.getElementById('main-chart'));
+    let cachedData = { bike: null, stand: null, labels: [], capacity: 0 };
+    let activeMode = 'all';
+
+    document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
+
+    async function fetchData() {
+        const date = document.getElementById('date-input').value;
+        const time = document.getElementById('time-input').value;
+        const stationId = parseInt(document.getElementById('station-input').value);
+        const errorMsg = document.getElementById('error-msg');
+
+        errorMsg.innerText = "";
+
+        if (isNaN(stationId) || stationId < 1 || stationId > 117) {
+            errorMsg.innerText = "Error: Station ID must be between 1 and 117";
+            return;
+        }
+
+        const timeStr = time.length === 5 ? `${time}:00` : time;
+        const baseUrl = "";
+
+        chart.showLoading({ text: 'Syncing Dual-Model Calculations...' });
+
+        try {
+            const [resBike, resStand] = await Promise.all([
+                fetch(`${baseUrl}/predict/bike/24h?date=${date}&time=${timeStr}&station_id=${stationId}`),
+                fetch(`${baseUrl}/predict/stand/24h?date=${date}&time=${timeStr}&station_id=${stationId}`)
+            ]);
+
+            const jsonBike = await resBike.json();
+            const jsonStand = await resStand.json();
+
+            if (!resBike.ok || !resStand.ok) throw new Error(jsonBike.error || jsonStand.error || "Request Failed");
+
+            // Cache Data
+            cachedData.bike = jsonBike.chart_data.data_available_bikes;
+            cachedData.stand = jsonStand.chart_data.data_empty_stands;
+            cachedData.labels = jsonBike.chart_data.labels;
+            cachedData.capacity = jsonBike.request_info.bike_stands_capacity;
+
+            updateChart();
+
+        } catch (err) {
+            errorMsg.innerText = "Error: " + err.message;
+            chart.clear();
+        } finally {
+            chart.hideLoading();
+        }
+    }
+
+    function switchTab(mode) {
+        activeMode = mode;
+
+        document.getElementById('btn-all').classList.toggle('active', mode === 'all');
+        document.getElementById('btn-bike').classList.toggle('active', mode === 'bike');
+        document.getElementById('btn-stand').classList.toggle('active', mode === 'stand');
+        updateChart();
+    }
+
+    function updateChart() {
+        if (!cachedData.bike) return;
+
+        const bikeSeries = {
+            name: 'Available Bikes (Model B)',
+            type: 'line',
+            smooth: true,
+            data: cachedData.bike,
+            itemStyle: { color: '#00d2d3' },
+            areaStyle: { opacity: 0.12, color: '#00d2d3' },
+            lineStyle: { width: 3 }
+        };
+
+        const standSeries = {
+            name: 'Empty Stands (Model A)',
+            type: 'line',
+            smooth: true,
+            data: cachedData.stand,
+            itemStyle: { color: '#ff5e5e' },
+            areaStyle: { opacity: 0.08, color: '#ff5e5e' },
+            lineStyle: { width: 3, type: 'dashed' }
+        };
+
+        let series = [];
+        if (activeMode === 'all')        series = [bikeSeries, standSeries];
+        else if (activeMode === 'bike')  series = [bikeSeries];
+        else                             series = [standSeries];
+
+        const option = {
+            title: {
+                text: "Next 24H Station Status Comparison",
+                subtext: `Total Capacity: ${cachedData.capacity}`,
+                left: 'center',
+                textStyle: { fontFamily: 'Poppins', fontWeight: 800 }
+            },
+            tooltip: { trigger: 'axis' },
+            legend: { bottom: '5%', data: ['Available Bikes (Model B)', 'Empty Stands (Model A)'] },
+            grid: { top: '15%', left: '5%', right: '5%', bottom: '15%', containLabel: true },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: cachedData.labels,
+                axisLabel: { formatter: v => v.split(' ')[1].substring(0, 5) }
+            },
+            yAxis: {
+                type: 'value',
+                max: cachedData.capacity,
+                name: 'Quantity'
+            },
+            series: series
+        };
+
+        chart.setOption(option, true);
+    }
+
+    window.addEventListener('resize', () => chart.resize());
+    window.onload = fetchData;
+</script>
+{% endblock %}

@@ -1,0 +1,300 @@
+{% extends "layout.html" %}
+
+{% block title %} — FAQ{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+
+    <!-- Page Header -->
+    <div style="margin-bottom: 2.5rem;">
+        <h1 style="font-size: 2.4rem; line-height: 1.2; margin-bottom: 0.75rem;">Frequently Asked Questions</h1>
+
+    </div>
+
+    <!-- Category: The Dublin Bikes Service -->
+    <div style="margin-bottom: 0.5rem;">
+        <span class="badge" style="background-color: var(--accent); margin-bottom: 1rem; display: inline-block;">
+            The Dublin Bikes Service
+        </span>
+    </div>
+
+    <div class="faq-group" style="margin-bottom: 2rem;">
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">What is Dublin Bikes?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin: 0;">
+                    Dublin Bikes is a public bike-sharing scheme operated by JCDecaux on behalf of Dublin City Council.
+                    It has over 100 docking stations and 1,500 bikes spread across the city centre.
+                    You can pick up a bike at any station and return it to any other station in the network.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">How do I get a subscription?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.6rem;">
+                    You can subscribe online at <strong>dublinbikes.ie</strong> or purchase a 3-day visitor pass
+                    directly at any docking station terminal using a credit or debit card.
+                </p>
+                <p style="font-weight: 400; color: #444; margin: 0;">
+                    The Annual subscription costs €35/year and gives you unlimited 30-minute journeys for free.
+                    The 3-Day Pass costs €5 and works the same way for its duration.
+                    Trips longer than 30 minutes incur additional charges per 30-minute block.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">How do I unlock a bike?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.5rem;">Follow these steps at any docking station terminal:</p>
+                <ol style="padding-left: 1.2rem; font-weight: 400; color: #444; display: flex; flex-direction: column; gap: 0.4rem;">
+                    <li>Select <strong>"Take a Bike"</strong> on the terminal screen.</li>
+                    <li>Enter your <strong>subscription card number</strong> (or enter the PIN sent by SMS for a visitor pass).</li>
+                    <li>Enter your <strong>4-digit PIN</strong>.</li>
+                    <li>The screen will show a dock number — go to that dock and pull the bike out firmly.</li>
+                    <li>The green light on the dock confirms the bike is successfully released.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">How do I return a bike?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.5rem;">
+                    To return your bike, push it firmly into any empty dock at any station. The dock's
+                    indicator light will turn <strong>green</strong> to confirm the bike is locked in correctly.
+                </p>
+                <p style="font-weight: 400; color: #444; margin: 0;">
+                    If the light stays red or the dock won't accept the bike, try a different empty dock. Never
+                    leave a bike that hasn't locked — you remain responsible for it until it is securely docked.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">What do I do if a station is full?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.5rem;">
+                    If your destination station is full, use this app's map to find the nearest station with
+                    available docks. You can also use the <strong>Nearby</strong> search feature to locate alternatives quickly.
+                </p>
+                <p style="font-weight: 400; color: #444; margin: 0;">
+                    When a station is full, you can request a 15-minute extension at the terminal to give yourself
+                    time to reach another station — this extension is free of charge.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Category: Using This App -->
+    <div style="margin-bottom: 0.5rem;">
+        <span class="badge" style="background-color: var(--secondary); margin-bottom: 1rem; display: inline-block;">
+            Using This Application
+        </span>
+    </div>
+
+    <div class="faq-group" style="margin-bottom: 2rem;">
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">What does the map show?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.5rem;">
+                    The map on the homepage shows all active Dublin Bikes stations across the city.
+                    Each marker indicates a station. Click on any marker to see:
+                </p>
+                <ul style="padding-left: 1.2rem; font-weight: 400; color: #444; display: flex; flex-direction: column; gap: 0.3rem;">
+                    <li>The station name and number</li>
+                    <li>Current number of available bikes</li>
+                    <li>Current number of free docking stands</li>
+                    <li>An availability chart for the past 24 hours</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">How do I search for a station near me?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.5rem;">
+                    Use the <strong>search bar</strong> at the top of the map to type any Dublin address or landmark.
+                    The map will pan to that location and highlight the nearest stations.
+                </p>
+                <p style="font-weight: 400; color: #444; margin: 0;">
+                    You can also open the <strong>station panel</strong> on the left side of the map (click the toggle tab)
+                    to browse all stations as a list, sorted by distance from your search result.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">What is the Prediction feature?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.5rem;">
+                    The Prediction feature uses a machine learning model trained on historical Dublin Bikes data
+                    to forecast bike and stand availability at a given station.
+                </p>
+                <ul style="padding-left: 1.2rem; font-weight: 400; color: #444; display: flex; flex-direction: column; gap: 0.4rem;">
+                    <li><strong>Prediction Plot</strong> — shows a 24-hour availability forecast chart for a chosen station and day.</li>
+                    <li><strong>Prediction Number</strong> — gives a single point-in-time estimate of available bikes or stands for specific inputs.</li>
+                </ul>
+                <p style="font-weight: 400; color: #444; margin-top: 0.5rem; margin-bottom: 0;">
+                    Predictions are estimates based on historical patterns and weather data. Actual availability
+                    may differ due to real-time events.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">Why do I need to log in for predictions?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin: 0;">
+                    The Prediction Plot and Prediction Number features are available to registered users only.
+                    Creating a free account lets us personalise your experience, save your favourite stations,
+                    and manage access to the ML-powered prediction tools.
+                    You can <a href="/auth/register" style="color: var(--primary); font-weight: 700;">sign up here</a> — it only takes a moment.
+                </p>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">How do I save favourite stations?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin: 0;">
+                    Once logged in, click the <strong>☆ star icon</strong> on any station's info panel to add it to your favourites.
+                    Your favourites are saved to your account and will appear highlighted on the map each time you log in.
+                    You can manage your favourites list from your account settings.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Category: Troubleshooting -->
+    <div style="margin-bottom: 0.5rem;">
+        <span class="badge" style="background-color: var(--accent); margin-bottom: 1rem; display: inline-block;">
+            Troubleshooting
+        </span>
+    </div>
+
+    <div class="faq-group" style="margin-bottom: 2rem;">
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">The bike won't unlock at the terminal — what do I do?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.5rem;">Try the following steps:</p>
+                <ol style="padding-left: 1.2rem; font-weight: 400; color: #444; display: flex; flex-direction: column; gap: 0.4rem;">
+                    <li>Double-check your PIN — it is the one sent to you by email or SMS when you registered.</li>
+                    <li>Ensure your subscription is active and has not expired.</li>
+                    <li>Try a different docking terminal at the same station.</li>
+                    <li>Contact Dublin Bikes customer support on <strong>1800 927 000</strong> (freephone).</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">The map isn't loading — what should I check?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin-bottom: 0.5rem;">If the map doesn't appear:</p>
+                <ul style="padding-left: 1.2rem; font-weight: 400; color: #444; display: flex; flex-direction: column; gap: 0.3rem;">
+                    <li>Check your internet connection.</li>
+                    <li>Disable any browser extensions that block scripts or maps (e.g. ad-blockers).</li>
+                    <li>Try a hard refresh: <strong>Ctrl + Shift + R</strong> (Windows/Linux) or <strong>Cmd + Shift + R</strong> (Mac).</li>
+                    <li>Try a different browser (Chrome or Firefox recommended).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="faq-item card" style="margin-bottom: 0.75rem; cursor: pointer;" onclick="toggleFaq(this)">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 0.95rem; font-weight: 800; margin: 0; text-transform: none; letter-spacing: 0;">I forgot my password — how do I reset it?</h3>
+                <span class="faq-icon" style="font-size: 1.2rem; font-weight: 800; transition: transform 0.2s; flex-shrink: 0; margin-left: 1rem;">+</span>
+            </div>
+            <div class="faq-answer" style="display: none; margin-top: 0.9rem; padding-top: 0.9rem; border-top: 2px solid #eee;">
+                <p style="font-weight: 400; color: #444; margin: 0;">
+                    Password reset functionality is coming soon. In the meantime, please contact the site
+                    administrator or register a new account. Your saved favourites are linked to your account ID.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Still need help? -->
+    <div style="background: var(--secondary); border: var(--border-thick); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-solid); text-align: center;">
+        <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem;">Still have a question?</h2>
+        <p style="font-weight: 400; color: #333; margin-bottom: 1.25rem;">
+            Check the <a href="/safety" style="color: var(--primary); font-weight: 700;">Safety page</a> for cycling rules,
+            or contact Dublin Bikes support directly.
+        </p>
+        <a href="/auth/register" class="btn btn-primary" style="margin-right: 0.5rem;">Create Account</a>
+        <a href="/" class="btn">View Map</a>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleFaq(item) {
+        const answer = item.querySelector('.faq-answer');
+        const icon = item.querySelector('.faq-icon');
+        const isOpen = answer.style.display !== 'none';
+
+        // Close all others in the same group
+        const group = item.closest('.faq-group');
+        if (group) {
+            group.querySelectorAll('.faq-item').forEach(function(other) {
+                other.querySelector('.faq-answer').style.display = 'none';
+                other.querySelector('.faq-icon').textContent = '+';
+                other.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+            });
+        }
+
+        // Toggle the clicked one
+        if (!isOpen) {
+            answer.style.display = 'block';
+            icon.textContent = '×';
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+</script>
+{% endblock %}
